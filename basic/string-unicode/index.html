@@ -3,11 +3,10 @@
 <html lang="" >
     <head>
         <meta charset="UTF-8">
-        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <title>文字列とUnicode · JavaScript Primer #jsprimer</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="JavaScriptが採用している文字コードであるUnicodeと関連するStringのメソッドについて紹介します。Stringのメソッドや文字列を扱う上で、UTF-16でエンコードされていることを意識する場面について紹介します。">
-        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="generator" content="HonKit 6.0.2">
         
         
         
@@ -25,11 +24,11 @@
                 
             
                 
-                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-highlight/website.css">
+                <link rel="stylesheet" href="../../gitbook/@honkit/honkit-plugin-highlight/website.css">
                 
             
                 
-                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-fontsettings/website.css">
+                <link rel="stylesheet" href="../../gitbook/@honkit/honkit-plugin-fontsettings/website.css">
                 
             
         
@@ -70,7 +69,73 @@
 
     <link rel="canonical" href="https://jsprimer.net/basic/string-unicode/">
 
-<meta name="google-site-verification" content="bMotEbgYwkzA3k4PkuyK_NUdz0bKh-Phz0oUwNmRSVo" />
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DWY0DLHWB6"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag("js", new Date());
+
+    gtag("config", "G-DWY0DLHWB6");
+</script>
+<script type="module">
+    // コンソールUIでコード実行したらイベントとして送信する
+    const onExecuteCode = (scriptType) => {
+        gtag("event", "execute_code", {
+            "event_category": "console",
+            "event_label": "execute_code",
+            "script_type": scriptType || "unknown"
+        });
+    };
+    let observer;
+    const observeEvalEvent = () => {
+        if (observer) {
+            observer.disconnect();
+        }
+        const callback = function(mutationsList) {
+            for (const mutation of mutationsList) {
+                const mirrorConsole = Array.from(mutation.addedNodes).find(node => Boolean(node.dataset.mirrorConsole));
+                if (mirrorConsole) {
+                    return onExecuteCode(mirrorConsole.dataset.mirrorConsole);
+                }
+            }
+        };
+        observer = new MutationObserver(callback);
+        observer.observe(document.body, { childList: true });
+    };
+    const eventMap = new WeakMap();
+    // 問題を報告ボタンを押したらイベントとして送信する
+    const onClickIssueReport = () => {
+        console.log("click_issue_report");
+        gtag("event", "click_issue_report", {
+            "event_category": "contribution",
+            "event_label": "click_issue_report"
+        });
+    };
+    const observeIssueReport = () => {
+        const targetButton = document.querySelector(".gitbook-plugin-github-issue-feedback");
+        // すでにイベントが登録されていたら何もしない
+        if (eventMap.has(targetButton)) {
+            return;
+        }
+        if (targetButton) {
+            targetButton.addEventListener("click", onClickIssueReport);
+            eventMap.set(targetButton, onClickIssueReport);
+        }
+    };
+    window.addEventListener("DOMContentLoaded", function() {
+        gitbook.events.on("page.change", function() {
+            observeEvalEvent();
+            observeIssueReport();
+        });
+    });
+
+</script>
+<meta name="google-site-verification" content="bMotEbgYwkzA3k4PkuyK_NUdz0bKh-Phz0oUwNmRSVo"/>
 <style>
     /*
      * Disable antialias
@@ -85,7 +150,7 @@
     }
 
     /* deny access chapter */
-    .summary li.chapter>span {
+    .summary li.chapter > span {
         cursor: not-allowed;
         opacity: .3;
     }
@@ -110,12 +175,21 @@
         line-height: inherit;
         margin-bottom: 0px !important;
     }
+
     /* Markdown */
-    .markdown-section sup, .markdown-section sub {
+    /* Support horizon scroll */
+    /* https://stackoverflow.com/questions/17770257/scrolling-tables-horizontally-without-wrapping-them-in-div */
+    .markdown-section table {
+        max-width: 100%;
+        overflow-x: auto;
+        display: block;
+    }
+    .markdown-section sup,
+    .markdown-section sub {
         font-size: 75%;
     }
 
-    .book_footer{
+    .book_footer {
         text-align: center;
         color: #000000;
         background: #ddd;
@@ -123,6 +197,22 @@
         margin-top: 16px;
         padding: 16px;
     }
+
+    /* github-issue-feedback */
+    .gitbook-plugin-github-issue-feedback {
+        background-color: #333;
+        color: #fff;
+        opacity: 0.8;
+        padding: 4px;
+        margin-right: 24px;
+        margin-bottom: 4px;
+        border-radius: 6px;
+    }
+
+    .gitbook-plugin-github-issue-feedback:hover {
+        opacity: 1;
+    }
+
     /* Hide footer on mobile */
     /* Use navigation width */
     @media (max-width: 1240px) {
@@ -130,33 +220,43 @@
             display: none;
         }
     }
+
+    .navigation {
+        min-width: 50px;
+    }
+
+    @media (min-width: 1240px) {
+        .honkit-plugin-sandpack {
+            width: calc(100% + 180px);
+            margin: 0 0 1em -90px;
+        }
+    }
+
+    .honkit-plugin-sandpack, .honkit-plugin-sandpack--buttonContainer {
+        margin-bottom: 1em;
+    }
+
 </style>
 <meta name="theme-color" content="#ffffff">
 <link rel="manifest" href="../../manifest.json">
-<script>
-    if ("serviceWorker" in navigator) {
-        const isLocalhost = Boolean(
-            // preview
-            /netlify.com/.test(window.location.hostname) ||
-            // local
-            window.location.hostname === "localhost" ||
-            // [::1] is the IPv6 localhost address.
-            window.location.hostname === "[::1]" ||
-            // 127.0.0.1/8 is considered localhost for IPv4.
-            window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/)
-        );
-        if (!isLocalhost) {
-            window.addEventListener("load", () => {
-                navigator.serviceWorker.register("../../sw.js");
-            });
+<script defer async>
+    // unregister old service worker(remove workbox)
+    // https://github.com/asciidwango/js-primer/pull/1701
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (const registration of registrations) {
+            registration.unregister();
         }
-    }
+    }).catch(function(err) {
+        console.error(new Error("Can not getRegistrations", {
+            cause: err
+        }));
+    });
 </script>
 
     </head>
     <body>
         
-<div class="book">
+<div class="book honkit-cloak">
     <div class="book-summary">
         
             
@@ -215,7 +315,20 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.2" data-path="../../intro/preparation/">
+        <li class="chapter " data-level="1.2.2" data-path="../../intro/sponsors/">
+            
+                <a href="../../intro/sponsors/">
+            
+                    
+                    JavaScript Primerスポンサー
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.3" data-path="../../intro/preparation/">
             
                 <a href="../../intro/preparation/">
             
@@ -228,7 +341,7 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.3" data-path="../../intro/feedback/">
+        <li class="chapter " data-level="1.2.4" data-path="../../intro/feedback/">
             
                 <a href="../../intro/feedback/">
             
@@ -538,7 +651,7 @@
                 <a href="../async/">
             
                     
-                    非同期処理:コールバック/Promise/Async Function
+                    非同期処理:Promise/Async Function
             
                 </a>
             
@@ -674,7 +787,7 @@
                 <a href="../../use-case/ajaxapp/">
             
                     
-                    Ajaxで通信
+                    Ajax通信
             
                 </a>
             
@@ -939,9 +1052,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.6" data-path="../../cheetsheet/">
+        <li class="chapter " data-level="1.6" data-path="../../cheatsheet/">
             
-                <a href="../../cheetsheet/">
+                <a href="../../cheatsheet/">
             
                     
                     付録: JavaScriptチートシート
@@ -971,8 +1084,8 @@
     <li class="divider"></li>
 
     <li>
-        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
-            Published with GitBook
+        <a href="https://github.com/honkit/honkit" target="blank" class="gitbook-link">
+            Published with HonKit
         </a>
     </li>
 </ul>
@@ -986,14 +1099,21 @@
     <div class="book-body">
         
             <div class="body-inner">
-                 
+                
                     
 
 <!-- Header -->
-<meta name="keywords" content="JavaScript,入門,入門書,チュートリアル,書籍,本,無料,Node.js,ブラウザ"/>
+<meta name="keywords" content="JavaScript,ECMAScript,JS,入門,チュートリアル,書籍,本,無料,Node.js,ブラウザ"/>
 <link rel="author" href="https://www.hatena.ne.jp/efcl/"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsearch.js@2/dist/cdn/docsearch.min.css"/>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/docsearch.js@2/dist/cdn/docsearch.min.js"></script>
+<!-- OGP -->
+<meta property="og:title" content="JavaScript Primer - 迷わないための入門書"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://jsprimer.net/"/>
+<meta property="og:image" content="https://jsprimer.net/landing/img/cover-optimized.jpg"/>
+<meta property="og:site_name" content="JavaScript Primer"/>
+<meta property="og:description" content="JavaScript Primerは、JavaScriptの基礎から応用までを一貫して学べる入門書です。"/>
 <style>
     .book-header {
         display: flex;
@@ -1371,8 +1491,8 @@
     </div>
     <div class="header-right">
         <!-- Icon: https://www.iconfinder.com/iconsets/circle-payment -->
-        <a class="amazon-link" title="Amazon: JavaScript Primer 迷わないための入門書"
-           href="https://www.amazon.co.jp/dp/4048930737/" target="_blank"><img
+        <a class="amazon-link" title="Amazon: JavaScript Primer 改訂2版 迷わないための入門書"
+           href="https://www.amazon.co.jp/dp/4048931105/" target="_blank"><img
                 width="22"
                 height="22"
                 style="margin: 1px;"
@@ -1383,12 +1503,12 @@
     </div>
 </div>
 
-<script type="text/javascript">
+<script defer>
+    // focus on search box
     document.querySelector(".searchbox [type=\"reset\"]").addEventListener("click", function() {
         this.parentNode.querySelector("input").focus();
     });
-</script>
-<script>
+    // init DocSearch
     var search = docsearch({
         apiKey: "fd28ebaba94be0c39fb9fa1b2fed4f23", // use a SEARCH-ONLY api key here
         indexName: "asciidwango",
@@ -1396,13 +1516,11 @@
         debug: false // set to `true` if you want to inspect the dropdown menu's CSS
     });
 </script>
-<script type="text/javascript">
-    (function(){var t,e,n,r,a;for(t=function(){var t;return t=[],function(){var e,n,r,a;for(n=["init","start","stop","user","track","action","event","goal","chat","buy","page","view","admin","group","alias","ready","link","form","click","submit","cmd","emit","on","send","css","js","style","option","get","set","collection"],e=function(e){return function(){return t.push([e].concat(Array.prototype.slice.call(arguments,0)))}},r=0,a=[];r<n.length;)t[n[r]]=e(n[r]),a.push(r++);return a}(),t.init=function(e,n){var r,a;return t.api_key=e,t.options=n||{},a=document.createElement("script"),a.type="text/javascript",a.async=!0,a.charset="utf-8",a.src=t.options.tracker_url||"https://static.karte.io/libs/tracker.js",r=document.getElementsByTagName("script")[0],r.parentNode.insertBefore(a,r)},t},r=window.karte_tracker_names||["tracker"],e=0,n=r.length;n>e;e++)a=r[e],window[a]||(window[a]=t());tracker.init("a2d22604ec1d1c6d9d53d9d3eb87961d", { spa_mode: { reset_past_actions: true, close_actions: true }})}).call(this);
-    window.addEventListener("DOMContentLoaded", function(){
+<script>
+    window.addEventListener("DOMContentLoaded", function() {
         gitbook.events.on("page.change", function() {
-            tracker.view();
+            setTimeout(() => console.clear(), 1000);
         });
-
     });
 </script>
 
@@ -1415,225 +1533,253 @@
                             
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="string-unicode"><a name="string-unicode" class="plugin-anchor" href="#string-unicode"><i class="fa fa-link" aria-hidden="true"></i></a>&#x6587;&#x5B57;&#x5217;&#x3068;Unicode </h1>
-<p>&#x300C;<a href="../string/">&#x6587;&#x5B57;&#x5217;</a>&#x300D;&#x306E;&#x7AE0;&#x3067;&#x7D39;&#x4ECB;&#x3057;&#x305F;&#x3088;&#x3046;&#x306B;&#x3001;JavaScript&#x306F;&#x6587;&#x5B57;&#x30B3;&#x30FC;&#x30C9;&#x3068;&#x3057;&#x3066;Unicode&#x3092;&#x63A1;&#x7528;&#x3057;&#x3001;&#x30A8;&#x30F3;&#x30B3;&#x30FC;&#x30C9;&#x65B9;&#x5F0F;&#x3068;&#x3057;&#x3066;UTF-16&#x3092;&#x63A1;&#x7528;&#x3057;&#x3066;&#x3044;&#x307E;&#x3059;&#x3002;
-&#x3053;&#x306E;UTF-16&#x3092;&#x63A1;&#x7528;&#x3057;&#x3066;&#x3044;&#x308B;&#x306E;&#x306F;&#x3001;&#x3042;&#x304F;&#x307E;&#x3067;JavaScript&#x306E;&#x5185;&#x90E8;&#x3067;&#x6587;&#x5B57;&#x5217;&#x3092;&#x6271;&#x3046;&#x969B;&#x306E;&#x6587;&#x5B57;&#x30B3;&#x30FC;&#x30C9;&#xFF08;&#x5185;&#x90E8;&#x30B3;&#x30FC;&#x30C9;&#xFF09;&#x3067;&#x3059;&#x3002;
-&#x305D;&#x306E;&#x305F;&#x3081;&#x3001;&#x30B3;&#x30FC;&#x30C9;&#x3092;&#x66F8;&#x3044;&#x305F;&#x30D5;&#x30A1;&#x30A4;&#x30EB;&#x81EA;&#x4F53;&#x306E;&#x6587;&#x5B57;&#x30B3;&#x30FC;&#x30C9;&#xFF08;&#x5916;&#x90E8;&#x30B3;&#x30FC;&#x30C9;&#xFF09;&#x306F;&#x3001;UTF-8&#x306E;&#x3088;&#x3046;&#x306B;UTF-16&#x4EE5;&#x5916;&#x306E;&#x6587;&#x5B57;&#x30B3;&#x30FC;&#x30C9;&#x3067;&#x3042;&#x3063;&#x3066;&#x3082;&#x554F;&#x984C;&#x3042;&#x308A;&#x307E;&#x305B;&#x3093;&#x3002;</p>
-<p>&#x300C;<a href="../string/">&#x6587;&#x5B57;&#x5217;</a>&#x300D;&#x306E;&#x7AE0;&#x3067;&#x306F;&#x3001;&#x3053;&#x308C;&#x3089;&#x306E;&#x6587;&#x5B57;&#x30B3;&#x30FC;&#x30C9;&#x306F;&#x610F;&#x8B58;&#x3057;&#x3066;&#x3044;&#x306A;&#x304B;&#x3063;&#x305F;&#x3088;&#x3046;&#x306B;&#x3001;&#x5185;&#x90E8;&#x7684;&#x306B;&#x3069;&#x306E;&#x3088;&#x3046;&#x306A;&#x6587;&#x5B57;&#x30B3;&#x30FC;&#x30C9;&#x3067;&#x6271;&#x3063;&#x3066;&#x3044;&#x308B;&#x304B;&#x306F;&#x610F;&#x8B58;&#x305B;&#x305A;&#x306B;&#x6587;&#x5B57;&#x5217;&#x51E6;&#x7406;&#x304C;&#x3067;&#x304D;&#x307E;&#x3059;&#x3002;
-&#x3057;&#x304B;&#x3057;&#x3001;JavaScript&#x306E;String&#x30AA;&#x30D6;&#x30B8;&#x30A7;&#x30AF;&#x30C8;&#x306B;&#x306F;&#x3053;&#x306E;&#x6587;&#x5B57;&#x30B3;&#x30FC;&#x30C9;&#xFF08;Unicode&#xFF09;&#x306B;&#x7279;&#x5316;&#x3057;&#x305F;API&#x3082;&#x3042;&#x308A;&#x307E;&#x3059;&#x3002;
-&#x307E;&#x305F;&#x3001;&#x7D75;&#x6587;&#x5B57;&#x3092;&#x542B;&#x3080;&#x7279;&#x5B9A;&#x306E;&#x6587;&#x5B57;&#x3092;&#x6271;&#x3046;&#x969B;&#x3084;&#x300C;&#x6587;&#x5B57;&#x6570;&#x300D;&#x3092;&#x6570;&#x3048;&#x308B;&#x3068;&#x3044;&#x3046;&#x5834;&#x5408;&#x306B;&#x306F;&#x3001;&#x5185;&#x90E8;&#x30B3;&#x30FC;&#x30C9;&#x3067;&#x3042;&#x308B;UTF-16&#x3092;&#x610F;&#x8B58;&#x3057;&#x306A;&#x3044;&#x3068;&#x3044;&#x3051;&#x306A;&#x3044;&#x5834;&#x9762;&#x304C;&#x3042;&#x308A;&#x307E;&#x3059;&#x3002;</p>
-<p>&#x3053;&#x306E;&#x7AE0;&#x3067;&#x306F;&#x3001;&#x6587;&#x5B57;&#x5217;&#x306B;&#x304A;&#x3051;&#x308B;Unicode&#x3092;&#x610F;&#x8B58;&#x3057;&#x306A;&#x3044;&#x3068;&#x3044;&#x3051;&#x306A;&#x3044;&#x5834;&#x9762;&#x306B;&#x3064;&#x3044;&#x3066;&#x898B;&#x3066;&#x3044;&#x304D;&#x307E;&#x3059;&#x3002;
-&#x307E;&#x305F;&#x3001;Unicode&#x81EA;&#x4F53;&#x3082;ECMAScript&#x3068;&#x540C;&#x3058;&#x3088;&#x3046;&#x306B;&#x6B74;&#x53F2;&#x304C;&#x3042;&#x308B;&#x4ED5;&#x69D8;&#x3067;&#x3042;&#x308A;&#x3001;Unicode&#x306E;&#x3059;&#x3079;&#x3066;&#x3092;&#x7D39;&#x4ECB;&#x3059;&#x308B;&#x306B;&#x306F;&#x81A8;&#x5927;&#x306A;&#x6587;&#x5B57;&#x5217;&#x304C;&#x5FC5;&#x8981;&#x306B;&#x306A;&#x308A;&#x307E;&#x3059;&#x3002;
-&#x305D;&#x306E;&#x305F;&#x3081;&#x3001;&#x3053;&#x306E;&#x7AE0;&#x306F;JavaScript&#x306B;&#x304A;&#x3051;&#x308B;Unicode&#x3068;UTF-16&#x306B;&#x8A71;&#x3092;&#x9650;&#x5B9A;&#x3057;&#x3066;&#x3044;&#x307E;&#x3059;&#x3002;</p>
-<p>Unicode&#x306E;&#x6B74;&#x53F2;&#x3092;&#x542B;&#x3081;&#x305F;&#x6587;&#x5B57;&#x30B3;&#x30FC;&#x30C9;&#x81EA;&#x4F53;&#x306B;&#x3064;&#x3044;&#x3066;&#x8A73;&#x3057;&#x304F;&#x77E5;&#x308A;&#x305F;&#x3044;&#x65B9;&#x306F;&#x300C;<a href="https://gihyo.jp/book/2019/978-4-297-10291-3" target="_blank">&#x30D7;&#x30ED;&#x30B0;&#x30E9;&#x30DE;&#x306E;&#x305F;&#x3081;&#x306E;&#x6587;&#x5B57;&#x30B3;&#x30FC;&#x30C9;&#x6280;&#x8853;&#x5165;&#x9580;</a>&#x300D;&#x3084;&#x300C;<a href="http://www.rutles.net/products/detail.php?product_id=298" target="_blank">&#x6587;&#x5B57;&#x30B3;&#x30FC;&#x30C9;&#x300C;&#x8D85;&#x300D;&#x7814;&#x7A76;</a>&#x300D;&#x7B49;&#x3092;&#x53C2;&#x7167;&#x3057;&#x3066;&#x304F;&#x3060;&#x3055;&#x3044;&#x3002;</p>
+<style>
+    .page-sponsors {
+        background: #fafafa;
+    }
+    .page-sponsors .page-sponsors-list {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+        padding: 1em 0;
+        list-style: none;
+        gap: 8px;
+    }
+    .page-sponsors-footer {
+        text-align: center;
+        padding: 0;
+        margin: 0;
+    }
+</style>
+<div class="page-sponsors">
+
+    <div class="page-sponsors-footer">
+        JavaScript Primerの<a href="https://jsprimer.net/intro/sponsors/">スポンサーを募集中</a>
+    </div>
+
+</div>
+
+                                <html><head></head><body><h1 id="string-unicode"><a name="string-unicode" class="plugin-anchor" href="#string-unicode"><i class="fa fa-link" aria-hidden="true"></i></a>文字列とUnicode </h1>
+<p>「<a href="../string/">文字列</a>」の章で紹介したように、JavaScriptは文字コードとしてUnicodeを採用し、エンコード方式としてUTF-16を採用しています。
+このUTF-16を採用しているのは、あくまでJavaScriptの内部で文字列を扱う際の文字コード（内部コード）です。
+そのため、コードを書いたファイル自体の文字コード（外部コード）は、UTF-8のようにUTF-16以外の文字コードであっても問題ありません。</p>
+<p>「<a href="../string/">文字列</a>」の章では、これらの文字コードは意識していなかったように、内部的にどのような文字コードで扱っているかは意識せずに文字列処理ができます。
+しかし、JavaScriptのStringオブジェクトにはこの文字コード（Unicode）に特化したAPIもあります。
+また、絵文字を含む特定の文字を扱う際や「文字数」を数えるという場合には、内部コードであるUTF-16を意識しないといけない場面があります。</p>
+<p>この章では、文字列におけるUnicodeを意識しないといけない場面について見ていきます。
+また、Unicode自体もECMAScriptと同じように歴史がある仕様であり、Unicodeのすべてを紹介するには膨大な文字列が必要になります。
+そのため、この章はJavaScriptにおけるUnicodeとUTF-16に話を限定しています。</p>
+<p>Unicodeの歴史を含めた文字コード自体について詳しく知りたい方は「<a href="https://gihyo.jp/book/2019/978-4-297-10291-3" target="_blank">プログラマのための文字コード技術入門</a>」や「<a href="https://www.rutles.net/products/detail.php?product_id=298" target="_blank">文字コード「超」研究</a>」等を参照してください。</p>
 <h2 id="code-point"><a name="code-point" class="plugin-anchor" href="#code-point"><i class="fa fa-link" aria-hidden="true"></i></a>Code Point </h2>
-<p>Unicode&#x306F;&#x3059;&#x3079;&#x3066;&#x306E;&#x6587;&#x5B57;&#xFF08;&#x5236;&#x5FA1;&#x6587;&#x5B57;&#x306A;&#x3069;&#x306E;&#x753B;&#x9762;&#x306B;&#x8868;&#x793A;&#x3055;&#x308C;&#x306A;&#x3044;&#x6587;&#x5B57;&#x3082;&#x542B;&#x3080;&#xFF09;&#x306B;&#x5BFE;&#x3057;&#x3066;ID&#x3092;&#x5B9A;&#x7FA9;&#x3059;&#x308B;&#x76EE;&#x7684;&#x3067;&#x7B56;&#x5B9A;&#x3055;&#x308C;&#x3066;&#x3044;&#x308B;&#x4ED5;&#x69D8;&#x3067;&#x3059;&#x3002;
-&#x3053;&#x306E;&#x300C;&#x6587;&#x5B57;&#x300D;&#x306B;&#x5BFE;&#x3059;&#x308B;&#x300C;&#x4E00;&#x610F;&#x306E;ID&#x300D;&#x306E;&#x3053;&#x3068;&#x3092;<strong>Code Point</strong>&#xFF08;&#x7B26;&#x53F7;&#x4F4D;&#x7F6E;&#xFF09;&#x3068;&#x547C;&#x3073;&#x307E;&#x3059;&#x3002;</p>
-<p>Code Point&#x3092;&#x6271;&#x3046;&#x30E1;&#x30BD;&#x30C3;&#x30C9;&#x306E;&#x591A;&#x304F;&#x306F;&#x3001;ECMAScript 2015&#x3067;&#x8FFD;&#x52A0;&#x3055;&#x308C;&#x3066;&#x3044;&#x307E;&#x3059;&#x3002;
-ES2015&#x3067;&#x8FFD;&#x52A0;&#x3055;&#x308C;&#x305F;<code>String#codePointAt</code>&#x30E1;&#x30BD;&#x30C3;&#x30C9;&#x3084;<code>String.fromCodePoint</code>&#x30E1;&#x30BD;&#x30C3;&#x30C9;&#x3092;&#x4F7F;&#x3046;&#x3053;&#x3068;&#x3067;&#x3001;&#x6587;&#x5B57;&#x5217;&#x3068;Code Point&#x3092;&#x76F8;&#x4E92;&#x5909;&#x63DB;&#x3067;&#x304D;&#x307E;&#x3059;&#x3002;</p>
-<p><code>String#codePointAt</code>&#x30E1;&#x30BD;&#x30C3;&#x30C9;<sup>[ES2015]</sup>&#x306F;&#x3001;&#x6587;&#x5B57;&#x5217;&#x306E;&#x6307;&#x5B9A;&#x30A4;&#x30F3;&#x30C7;&#x30C3;&#x30AF;&#x30B9;&#x306B;&#x3042;&#x308B;&#x6587;&#x5B57;&#x306E;Code Point&#x306E;&#x5024;&#x3092;&#x8FD4;&#x3057;&#x307E;&#x3059;&#x3002;</p>
+<p>Unicodeはすべての文字（制御文字などの画面に表示されない文字も含む）に対してIDを定義する目的で策定されている仕様です。
+この「文字」に対する「一意のID」のことを<strong>Code Point</strong>（符号位置）と呼びます。</p>
+<p>Code Pointを扱うメソッドの多くは、ECMAScript 2015で追加されています。
+ES2015で追加されたStringの<code>codePointAt</code>メソッドや<code>String.fromCodePoint</code>静的メソッドを使うことで、文字列とCode Pointを相互変換できます。</p>
+<p>Stringの<code>codePointAt</code>メソッド<sup>[ES2015]</sup>は、文字列の指定インデックスにある文字のCode Pointの値を返します。</p>
 <p><a class="gitbook-plugin-js-console" aria-hidden="true"></a></p>
-<pre><code class="lang-js"><span class="hljs-comment">// &#x6587;&#x5B57;&#x5217;&quot;&#x3042;&quot;&#x306E;Code Point&#x3092;&#x53D6;&#x5F97;</span>
-<span class="hljs-built_in">console</span>.log(<span class="hljs-string">&quot;&#x3042;&quot;</span>.codePointAt(<span class="hljs-number">0</span>)); <span class="hljs-comment">// =&gt; 12354</span>
+<pre><code class="lang-js"><span class="hljs-comment">// 文字列"あ"のCode Pointを取得</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">"あ"</span>.<span class="hljs-title function_">codePointAt</span>(<span class="hljs-number">0</span>)); <span class="hljs-comment">// =&gt; 12354</span>
 </code></pre>
-<p>&#x4E00;&#x65B9;&#x306E;<code>String.fromCodePoint</code>&#x30E1;&#x30BD;&#x30C3;&#x30C9;<sup>[ES2015]</sup>&#x306F;&#x3001;&#x6307;&#x5B9A;&#x3057;&#x305F;Code Point&#x306B;&#x5BFE;&#x5FDC;&#x3059;&#x308B;&#x6587;&#x5B57;&#x3092;&#x8FD4;&#x3057;&#x307E;&#x3059;&#x3002;</p>
+<p>一方の<code>String.fromCodePoint</code>メソッド<sup>[ES2015]</sup>は、指定したCode Pointに対応する文字を返します。</p>
 <p><a class="gitbook-plugin-js-console" aria-hidden="true"></a></p>
-<pre><code class="lang-js"><span class="hljs-comment">// Code Point&#x304C;`12354`&#x306E;&#x6587;&#x5B57;&#x3092;&#x53D6;&#x5F97;&#x3059;&#x308B;</span>
-<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">String</span>.fromCodePoint(<span class="hljs-number">12354</span>)); <span class="hljs-comment">// =&gt; &quot;&#x3042;&quot;</span>
-<span class="hljs-comment">// `12354`&#x3092;16&#x9032;&#x6570;&#x30EA;&#x30C6;&#x30E9;&#x30EB;&#x3067;&#x8868;&#x8A18;&#x3057;&#x3066;&#x3082;&#x540C;&#x3058;&#x7D50;&#x679C;</span>
-<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">String</span>.fromCodePoint(<span class="hljs-number">0x3042</span>)); <span class="hljs-comment">// =&gt; &quot;&#x3042;&quot;</span>
+<pre><code class="lang-js"><span class="hljs-comment">// Code Pointが`12354`の文字を取得する</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title class_">String</span>.<span class="hljs-title function_">fromCodePoint</span>(<span class="hljs-number">12354</span>)); <span class="hljs-comment">// =&gt; "あ"</span>
+<span class="hljs-comment">// `12354`を16進数リテラルで表記しても同じ結果</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title class_">String</span>.<span class="hljs-title function_">fromCodePoint</span>(<span class="hljs-number">0x3042</span>)); <span class="hljs-comment">// =&gt; "あ"</span>
 </code></pre>
-<p>&#x307E;&#x305F;&#x3001;&#x6587;&#x5B57;&#x5217;&#x30EA;&#x30C6;&#x30E9;&#x30EB;&#x4E2D;&#x306B;&#x306F;Unicode&#x30A8;&#x30B9;&#x30B1;&#x30FC;&#x30D7;&#x30B7;&#x30FC;&#x30B1;&#x30F3;&#x30B9;&#x3067;&#x3001;&#x76F4;&#x63A5;Code Point&#x3092;&#x66F8;&#x304F;&#x3053;&#x3068;&#x3082;&#x3067;&#x304D;&#x307E;&#x3059;&#x3002;
-Code Point&#x306F;<code>\u{Code Point&#x306E;16&#x9032;&#x6570;&#x306E;&#x5024;}</code>&#x306E;&#x3088;&#x3046;&#x306B;&#x30A8;&#x30B9;&#x30B1;&#x30FC;&#x30D7;&#x30B7;&#x30FC;&#x30B1;&#x30F3;&#x30B9;&#x3068;&#x3057;&#x3066;&#x8A18;&#x8FF0;&#x3067;&#x304D;&#x307E;&#x3059;&#x3002;
-Unicode&#x30A8;&#x30B9;&#x30B1;&#x30FC;&#x30D7;&#x30B7;&#x30FC;&#x30B1;&#x30F3;&#x30B9;&#x3067;&#x306F;&#x3001;Code Point&#x306E;16&#x9032;&#x6570;&#x306E;&#x5024;&#x304C;&#x5FC5;&#x8981;&#x3068;&#x306A;&#x308A;&#x307E;&#x3059;&#x3002;
-<code>Number#toString</code>&#x30E1;&#x30BD;&#x30C3;&#x30C9;&#x306E;&#x5F15;&#x6570;&#x306B;&#x57FA;&#x6570;&#x3068;&#x306A;&#x308B;<code>16</code>&#x3092;&#x6E21;&#x3059;&#x3053;&#x3068;&#x3067;&#x3001;16&#x9032;&#x6570;&#x306E;&#x6587;&#x5B57;&#x5217;&#x3092;&#x53D6;&#x5F97;&#x3067;&#x304D;&#x307E;&#x3059;&#x3002;</p>
+<p>また、文字列リテラル中にはUnicodeエスケープシーケンスで、直接Code Pointを書くこともできます。
+Code Pointは<code>\u{Code Pointの16進数の値}</code>のようにエスケープシーケンスとして記述できます。
+Unicodeエスケープシーケンスでは、Code Pointの16進数の値が必要となります。
+Numberの<code>toString</code>メソッドの引数に基数となる<code>16</code>を渡すことで、16進数の文字列を取得できます。</p>
 <p><a class="gitbook-plugin-js-console" aria-hidden="true"></a></p>
-<pre><code class="lang-js"><span class="hljs-comment">// &quot;&#x3042;&quot;&#x306E;Code Point&#x306F;12354</span>
-<span class="hljs-keyword">const</span> codePointOf&#x3042; = <span class="hljs-string">&quot;&#x3042;&quot;</span>.codePointAt(<span class="hljs-number">0</span>);
-<span class="hljs-comment">// 12354&#x306E;16&#x9032;&#x6570;&#x8868;&#x73FE;&#x306F;&quot;3042&quot;</span>
-<span class="hljs-keyword">const</span> hexOf&#x3042; = codePointOf&#x3042;.toString(<span class="hljs-number">16</span>);
-<span class="hljs-built_in">console</span>.log(hexOf&#x3042;);<span class="hljs-comment">// =&gt; &quot;3042&quot;</span>
-<span class="hljs-comment">// Unicode&#x30A8;&#x30B9;&#x30B1;&#x30FC;&#x30D7;&#x3067;&quot;&#x3042;&quot;&#x3092;&#x8868;&#x73FE;&#x3067;&#x304D;&#x308B;</span>
-<span class="hljs-built_in">console</span>.log(<span class="hljs-string">&quot;\u{3042}&quot;</span>); <span class="hljs-comment">// =&gt; &quot;&#x3042;&quot;</span>
+<pre><code class="lang-js"><span class="hljs-comment">// "あ"のCode Pointは12354</span>
+<span class="hljs-keyword">const</span> codePointOfあ = <span class="hljs-string">"あ"</span>.<span class="hljs-title function_">codePointAt</span>(<span class="hljs-number">0</span>);
+<span class="hljs-comment">// 12354の16進数表現は"3042"</span>
+<span class="hljs-keyword">const</span> hexOfあ = codePointOfあ.<span class="hljs-title function_">toString</span>(<span class="hljs-number">16</span>);
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(hexOfあ);<span class="hljs-comment">// =&gt; "3042"</span>
+<span class="hljs-comment">// Unicodeエスケープで"あ"を表現できる</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">"\u{3042}"</span>); <span class="hljs-comment">// =&gt; "あ"</span>
 </code></pre>
-<h2 id="code-point-is-not-code-unit"><a name="code-point-is-not-code-unit" class="plugin-anchor" href="#code-point-is-not-code-unit"><i class="fa fa-link" aria-hidden="true"></i></a>Code Point&#x3068;Code Unit&#x306E;&#x9055;&#x3044; </h2>
-<p>Code Point&#xFF08;&#x7B26;&#x53F7;&#x4F4D;&#x7F6E;&#xFF09;&#x306B;&#x3064;&#x3044;&#x3066;&#x7D39;&#x4ECB;&#x3057;&#x307E;&#x3057;&#x305F;&#x304C;&#x3001;JavaScript&#x306E;&#x6587;&#x5B57;&#x5217;&#x306E;&#x69CB;&#x6210;&#x8981;&#x7D20;&#x306F;UTF-16&#x3067;&#x5909;&#x63DB;&#x3055;&#x308C;&#x305F;Code Unit&#xFF08;&#x7B26;&#x53F7;&#x5358;&#x4F4D;&#xFF09;&#x3067;&#x3059;&#xFF08;&#x8A73;&#x7D30;&#x306F;&#x300C;<a href="../string/">&#x6587;&#x5B57;&#x5217;</a>&#x300D;&#x306E;&#x7AE0;&#x3092;&#x53C2;&#x7167;&#xFF09;&#x3002;
-&#x3042;&#x308B;&#x7BC4;&#x56F2;&#x306E;&#x6587;&#x5B57;&#x5217;&#x306B;&#x3064;&#x3044;&#x3066;&#x306F;&#x3001;Code Point&#xFF08;&#x7B26;&#x53F7;&#x4F4D;&#x7F6E;&#xFF09;&#x3068;Code Unit&#xFF08;&#x7B26;&#x53F7;&#x5358;&#x4F4D;&#xFF09;&#x306F;&#x7D50;&#x679C;&#x3068;&#x3057;&#x3066;&#x540C;&#x3058;&#x5024;&#x3068;&#x306A;&#x308A;&#x307E;&#x3059;&#x3002;</p>
-<p>&#x6B21;&#x306E;&#x30B3;&#x30FC;&#x30C9;&#x3067;&#x306F;&#x3001;<code>&#x30A2;&#x30AA;&#x30A4;</code>&#x3068;&#x3044;&#x3046;&#x6587;&#x5B57;&#x5217;&#x306E;&#x5404;&#x8981;&#x7D20;&#x3092;Code Point&#x3068;Code Unit&#x3068;&#x3057;&#x3066;&#x8868;&#x793A;&#x3057;&#x3066;&#x3044;&#x307E;&#x3059;&#x3002;
-<code>convertCodeUnits</code>&#x95A2;&#x6570;&#x306F;&#x6587;&#x5B57;&#x5217;&#x3092;Code Unit&#x306E;&#x914D;&#x5217;&#x306B;&#x3057;&#x3001;<code>convertCodePoints</code>&#x95A2;&#x6570;&#x306F;&#x6587;&#x5B57;&#x5217;&#x3092;Code Point&#x306E;&#x914D;&#x5217;&#x306B;&#x3057;&#x3066;&#x3044;&#x307E;&#x3059;&#x3002;&#x305D;&#x308C;&#x305E;&#x308C;&#x306E;&#x95A2;&#x6570;&#x306E;&#x5B9F;&#x88C5;&#x306F;&#x307E;&#x3060;&#x7406;&#x89E3;&#x3057;&#x306A;&#x304F;&#x3066;&#x3082;&#x554F;&#x984C;&#x3042;&#x308A;&#x307E;&#x305B;&#x3093;&#x3002;</p>
+<h2 id="code-point-is-not-code-unit"><a name="code-point-is-not-code-unit" class="plugin-anchor" href="#code-point-is-not-code-unit"><i class="fa fa-link" aria-hidden="true"></i></a>Code PointとCode Unitの違い </h2>
+<p>Code Point（符号位置）について紹介しましたが、JavaScriptの文字列の構成要素はUTF-16で変換されたCode Unit（符号単位）です（詳細は「<a href="../string/">文字列</a>」の章を参照）。
+ある範囲の文字列については、Code Point（符号位置）とCode Unit（符号単位）は結果として同じ値となります。</p>
+<p>次のコードでは、<code>アオイ</code>という文字列の各要素をCode PointとCode Unitとして表示しています。
+<code>convertCodeUnits</code>関数は文字列をCode Unitの配列にし、<code>convertCodePoints</code>関数は文字列をCode Pointの配列にしています。それぞれの関数の実装はまだ理解しなくても問題ありません。</p>
 <p><a class="gitbook-plugin-js-console" aria-hidden="true"></a></p>
-<pre><code class="lang-js"><span class="hljs-comment">// &#x6587;&#x5B57;&#x5217;&#x3092;Code Unit(16&#x9032;&#x6570;)&#x306E;&#x914D;&#x5217;&#x306B;&#x3057;&#x3066;&#x8FD4;&#x3059;</span>
-<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">convertCodeUnits</span>(<span class="hljs-params">str</span>) </span>{
+<pre><code class="lang-js"><span class="hljs-comment">// 文字列をCode Unit(16進数)の配列にして返す</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">convertCodeUnits</span>(<span class="hljs-params">str</span>) {
     <span class="hljs-keyword">const</span> codeUnits = [];
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; str.length; i++) {
-        codeUnits.push(str.charCodeAt(i).toString(<span class="hljs-number">16</span>));
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; str.<span class="hljs-property">length</span>; i++) {
+        codeUnits.<span class="hljs-title function_">push</span>(str.<span class="hljs-title function_">charCodeAt</span>(i).<span class="hljs-title function_">toString</span>(<span class="hljs-number">16</span>));
     }
     <span class="hljs-keyword">return</span> codeUnits;
 }
-<span class="hljs-comment">// &#x6587;&#x5B57;&#x5217;&#x3092;Code Point(16&#x9032;&#x6570;)&#x306E;&#x914D;&#x5217;&#x306B;&#x3057;&#x3066;&#x8FD4;&#x3059;</span>
-<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">convertCodePoints</span>(<span class="hljs-params">str</span>) </span>{
-    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Array</span>.from(str).map(char =&gt; {
-        <span class="hljs-keyword">return</span> char.codePointAt(<span class="hljs-number">0</span>).toString(<span class="hljs-number">16</span>);
+<span class="hljs-comment">// 文字列をCode Point(16進数)の配列にして返す</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">convertCodePoints</span>(<span class="hljs-params">str</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(str).<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">char</span> =&gt;</span> {
+        <span class="hljs-keyword">return</span> char.<span class="hljs-title function_">codePointAt</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-number">16</span>);
     });
 }
 
-<span class="hljs-keyword">const</span> str = <span class="hljs-string">&quot;&#x30A2;&#x30AA;&#x30A4;&quot;</span>;
-<span class="hljs-keyword">const</span> codeUnits = convertCodeUnits(str);
-<span class="hljs-built_in">console</span>.log(codeUnits); <span class="hljs-comment">// =&gt; [&quot;30a2&quot;, &quot;30aa&quot;, &quot;30a4&quot;]</span>
-<span class="hljs-keyword">const</span> codePoints = convertCodePoints(str);
-<span class="hljs-built_in">console</span>.log(codePoints); <span class="hljs-comment">// =&gt; [&quot;30a2&quot;, &quot;30aa&quot;, &quot;30a4&quot;]</span>
+<span class="hljs-keyword">const</span> str = <span class="hljs-string">"アオイ"</span>;
+<span class="hljs-keyword">const</span> codeUnits = <span class="hljs-title function_">convertCodeUnits</span>(str);
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(codeUnits); <span class="hljs-comment">// =&gt; ["30a2", "30aa", "30a4"]</span>
+<span class="hljs-keyword">const</span> codePoints = <span class="hljs-title function_">convertCodePoints</span>(str);
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(codePoints); <span class="hljs-comment">// =&gt; ["30a2", "30aa", "30a4"]</span>
 </code></pre>
-<p>&#x5B9F;&#x884C;&#x3057;&#x305F;&#x7D50;&#x679C;&#x3092;&#x307E;&#x3068;&#x3081;&#x3066;&#x307F;&#x308B;&#x3068;&#x3001;&#x3053;&#x306E;&#x6587;&#x5B57;&#x5217;&#x306B;&#x304A;&#x3044;&#x3066;&#x306F;Code Point&#x3068;Code Unit&#x304C;&#x540C;&#x3058;&#x5024;&#x306B;&#x306A;&#x3063;&#x3066;&#x3044;&#x308B;&#x3053;&#x3068;&#x304C;&#x308F;&#x304B;&#x308A;&#x307E;&#x3059;&#x3002;</p>
-<p><img src="img/codeunit-codepoint-table.png" alt="&#x6587;&#x5B57;&#x5217;&#x306B;&#x304A;&#x3051;&#x308B;Code Unit&#x3068;Code Point&#x306E;&#x8868;"></p>
-<p>&#x3057;&#x304B;&#x3057;&#x3001;&#x6587;&#x5B57;&#x5217;&#x306B;&#x3088;&#x3063;&#x3066;&#x306F;Code Point&#x3068;Code Unit&#x304C;&#x7570;&#x306A;&#x308B;&#x5024;&#x3068;&#x306A;&#x308B;&#x5834;&#x5408;&#x304C;&#x3042;&#x308A;&#x307E;&#x3059;&#x3002;</p>
-<p>&#x5148;&#x307B;&#x3069;&#x3068;&#x540C;&#x3058;&#x95A2;&#x6570;&#x3092;&#x4F7F;&#x3044;&#x3001;<code>&#x30EA;&#x30F3;&#x30B4;&#x1F34E;</code>&#xFF08;&#x30EA;&#x30F3;&#x30B4;&#x306E;&#x7D75;&#x6587;&#x5B57;&#xFF09;&#x3068;&#x3044;&#x3046;&#x6587;&#x5B57;&#x5217;&#x3092;&#x69CB;&#x6210;&#x3059;&#x308B;Code Unit&#x3068;Code Point&#x3092;&#x898B;&#x6BD4;&#x3079;&#x3066;&#x307F;&#x307E;&#x3059;&#x3002;</p>
+<p>実行した結果をまとめてみると、この文字列においてはCode PointとCode Unitが同じ値になっていることがわかります。</p>
+<p><img src="img/codeunit-codepoint-table.png" alt="文字列におけるCode UnitとCode Pointの表"></img></p>
+<p>しかし、文字列によってはCode PointとCode Unitが異なる値となる場合があります。</p>
+<p>先ほどと同じ関数を使い、<code>リンゴ🍎</code>（リンゴの絵文字）という文字列を構成するCode UnitとCode Pointを見比べてみます。</p>
 <p><a class="gitbook-plugin-js-console" aria-hidden="true"></a></p>
-<pre><code class="lang-js"><span class="hljs-comment">// &#x6587;&#x5B57;&#x5217;&#x3092;Code Unit(16&#x9032;&#x6570;)&#x306E;&#x914D;&#x5217;&#x306B;&#x3057;&#x3066;&#x8FD4;&#x3059;</span>
-<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">convertCodeUnits</span>(<span class="hljs-params">str</span>) </span>{
+<pre><code class="lang-js"><span class="hljs-comment">// 文字列をCode Unit(16進数)の配列にして返す</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">convertCodeUnits</span>(<span class="hljs-params">str</span>) {
     <span class="hljs-keyword">const</span> codeUnits = [];
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; str.length; i++) {
-        codeUnits.push(str.charCodeAt(i).toString(<span class="hljs-number">16</span>));
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; str.<span class="hljs-property">length</span>; i++) {
+        codeUnits.<span class="hljs-title function_">push</span>(str.<span class="hljs-title function_">charCodeAt</span>(i).<span class="hljs-title function_">toString</span>(<span class="hljs-number">16</span>));
     }
     <span class="hljs-keyword">return</span> codeUnits;
 }
-<span class="hljs-comment">// &#x6587;&#x5B57;&#x5217;&#x3092;Code Point(16&#x9032;&#x6570;)&#x306E;&#x914D;&#x5217;&#x306B;&#x3057;&#x3066;&#x8FD4;&#x3059;</span>
-<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">convertCodePoints</span>(<span class="hljs-params">str</span>) </span>{
-    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Array</span>.from(str).map(char =&gt; {
-        <span class="hljs-keyword">return</span> char.codePointAt(<span class="hljs-number">0</span>).toString(<span class="hljs-number">16</span>);
+<span class="hljs-comment">// 文字列をCode Point(16進数)の配列にして返す</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">convertCodePoints</span>(<span class="hljs-params">str</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(str).<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">char</span> =&gt;</span> {
+        <span class="hljs-keyword">return</span> char.<span class="hljs-title function_">codePointAt</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-number">16</span>);
     });
 }
 
-<span class="hljs-keyword">const</span> str = <span class="hljs-string">&quot;&#x30EA;&#x30F3;&#x30B4;&#x1F34E;&quot;</span>;
-<span class="hljs-keyword">const</span> codeUnits = convertCodeUnits(str);
-<span class="hljs-built_in">console</span>.log(codeUnits); <span class="hljs-comment">// =&gt; [&quot;30ea&quot;, &quot;30f3&quot;, &quot;30b4&quot;, &quot;d83c&quot;, &quot;df4e&quot;]</span>
-<span class="hljs-keyword">const</span> codePoints = convertCodePoints(str);
-<span class="hljs-built_in">console</span>.log(codePoints); <span class="hljs-comment">// =&gt; [&quot;30ea&quot;, &quot;30f3&quot;, &quot;30b4&quot;, &quot;1f34e&quot;]</span>
+<span class="hljs-keyword">const</span> str = <span class="hljs-string">"リンゴ🍎"</span>;
+<span class="hljs-keyword">const</span> codeUnits = <span class="hljs-title function_">convertCodeUnits</span>(str);
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(codeUnits); <span class="hljs-comment">// =&gt; ["30ea", "30f3", "30b4", "d83c", "df4e"]</span>
+<span class="hljs-keyword">const</span> codePoints = <span class="hljs-title function_">convertCodePoints</span>(str);
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(codePoints); <span class="hljs-comment">// =&gt; ["30ea", "30f3", "30b4", "1f34e"]</span>
 </code></pre>
-<p>&#x5B9F;&#x884C;&#x3057;&#x305F;&#x7D50;&#x679C;&#x3092;&#x307E;&#x3068;&#x3081;&#x3066;&#x307F;&#x308B;&#x3068;&#x3001;&#x3053;&#x306E;&#x7D75;&#x6587;&#x5B57;&#x3092;&#x542B;&#x3080;&#x6587;&#x5B57;&#x5217;&#x306B;&#x304A;&#x3044;&#x3066;&#x306F;Code Point&#x3068;Code Unit&#x304C;&#x7570;&#x306A;&#x308B;&#x5024;&#x3068;&#x306A;&#x308B;&#x3053;&#x3068;&#x304C;&#x308F;&#x304B;&#x308A;&#x307E;&#x3059;&#x3002;</p>
-<p><img src="img/emoji-codeunit-codepoint-table.png" alt="&#x7D75;&#x6587;&#x5B57;&#x3092;&#x542B;&#x3093;&#x3060;&#x6587;&#x5B57;&#x5217;&#x306B;&#x304A;&#x3051;&#x308B;Code Unit&#x3068;Code Point&#x306E;&#x8868;"></p>
-<p>&#x5177;&#x4F53;&#x7684;&#x306B;&#x306F;&#x3001;Code Point&#x306E;&#x8981;&#x7D20;&#x6570;&#x304C;4&#x3064;&#x306A;&#x306E;&#x306B;&#x5BFE;&#x3057;&#x3066;&#x3001;Code Unit&#x306E;&#x8981;&#x7D20;&#x6570;&#x304C;5&#x3064;&#x306B;&#x306A;&#x3063;&#x3066;&#x3044;&#x307E;&#x3059;&#x3002;
-&#x307E;&#x305F;&#x3001;Code Point&#x3067;&#x306F;1&#x3064;&#x306E;Code Point&#x304C;<code>&#x1F34E;</code>&#x306B;&#x5BFE;&#x5FDC;&#x3057;&#x3066;&#x3044;&#x307E;&#x3059;&#x304C;&#x3001;Code Unit&#x3067;&#x306F;2&#x3064;&#x306E;Code Unit&#x3067;<code>&#x1F34E;</code>&#x306B;&#x5BFE;&#x5FDC;&#x3057;&#x3066;&#x3044;&#x307E;&#x3059;&#x3002;JavaScript&#x3067;&#x306F;&#x300C;&#x6587;&#x5B57;&#x5217;&#x306F;Code Unit&#x304C;&#x9806;&#x756A;&#x306B;&#x4E26;&#x3093;&#x3060;&#x3082;&#x306E;&#x300D;&#x3068;&#x3057;&#x3066;&#x6271;&#x308F;&#x308C;&#x308B;&#x305F;&#x3081;&#x3053;&#x306E;&#x6587;&#x5B57;&#x5217;&#x306E;&#x8981;&#x7D20;&#x6570;&#xFF08;&#x9577;&#x3055;&#xFF09;&#x306F;Code Unit&#x306E;&#x500B;&#x6570;&#x3067;&#x3042;&#x308B;5&#x3064;&#x3068;&#x306A;&#x3063;&#x3066;&#x3044;&#x307E;&#x3059;&#x3002;</p>
-<p>&#x3042;&#x308B;1&#x3064;&#x306E;&#x6587;&#x5B57;&#x306B;&#x5BFE;&#x5FDC;&#x3059;&#x308B;ID&#x3067;&#x3042;&#x308B;Code Point&#x3092;&#x3001;16bit&#xFF08;2&#x30D0;&#x30A4;&#x30C8;&#xFF09;&#x306E;Code Unit&#x3067;&#x8868;&#x73FE;&#x3059;&#x308B;&#x306E;&#x304C;UTF-16&#x3068;&#x3044;&#x3046;&#x30A8;&#x30F3;&#x30B3;&#x30FC;&#x30C9;&#x65B9;&#x5F0F;&#x3067;&#x3059;&#x3002;&#x3057;&#x304B;&#x3057;&#x3001;16bit&#xFF08;2&#x30D0;&#x30A4;&#x30C8;&#xFF09;&#x3067;&#x8868;&#x73FE;&#x3067;&#x304D;&#x308B;&#x7BC4;&#x56F2;&#x306F;&#x3001;65536&#x7A2E;&#x985E;&#xFF08;2&#x306E;16&#x4E57;&#xFF09;&#x3067;&#x3059;&#x3002;
-&#x73FE;&#x5728;&#x3001;Unicode&#x306B;&#x767B;&#x9332;&#x3055;&#x308C;&#x3066;&#x3044;&#x308B;Code Point&#x306F;10&#x4E07;&#x7A2E;&#x985E;&#x3092;&#x8D85;&#x3048;&#x3066;&#x3044;&#x308B;&#x305F;&#x3081;&#x3001;&#x3059;&#x3079;&#x3066;&#x306E;&#x6587;&#x5B57;&#x3068;Code Unit&#x3092;1&#x5BFE;1&#x306E;&#x95A2;&#x4FC2;&#x3067;&#x8868;&#x3059;&#x3053;&#x3068;&#x304C;&#x3067;&#x304D;&#x307E;&#x305B;&#x3093;&#x3002;</p>
-<p>&#x3053;&#x306E;&#x3088;&#x3046;&#x306A;&#x5834;&#x5408;&#x306B;&#x3001;UTF-16&#x3067;&#x306F;2&#x3064;Code Unit&#x306E;&#x7D44;&#x307F;&#x5408;&#x308F;&#x305B;&#xFF08;&#x5408;&#x8A08;4&#x30D0;&#x30A4;&#x30C8;&#xFF09;&#x3067;1&#x3064;&#x306E;&#x6587;&#x5B57;&#xFF08;1&#x3064;&#x306E;Code Point&#xFF09;&#x3092;&#x8868;&#x73FE;&#x3057;&#x307E;&#x3059;&#x3002;&#x3053;&#x306E;&#x4ED5;&#x7D44;&#x307F;&#x3092;<strong>&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#x30DA;&#x30A2;</strong>&#x3068;&#x547C;&#x3073;&#x307E;&#x3059;&#x3002;</p>
-<h2 id="surrogate-pair"><a name="surrogate-pair" class="plugin-anchor" href="#surrogate-pair"><i class="fa fa-link" aria-hidden="true"></i></a>&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#x30DA;&#x30A2; </h2>
-<p>&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#x30DA;&#x30A2;&#x3067;&#x306F;&#x3001;2&#x3064;Code Unit&#x306E;&#x7D44;&#x307F;&#x5408;&#x308F;&#x305B;&#xFF08;&#x5408;&#x8A08;4&#x30D0;&#x30A4;&#x30C8;&#xFF09;&#x3067;1&#x3064;&#x306E;&#x6587;&#x5B57;&#xFF08;1&#x3064;&#x306E;Code Point&#xFF09;&#x3092;&#x8868;&#x73FE;&#x3057;&#x307E;&#x3059;&#x3002;UTF-16&#x3067;&#x306F;&#x3001;&#x6B21;&#x306E;&#x7BC4;&#x56F2;&#x3092;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#x30DA;&#x30A2;&#x306B;&#x5229;&#x7528;&#x3059;&#x308B;&#x9818;&#x57DF;&#x3068;&#x3057;&#x3066;&#x3044;&#x307E;&#x3059;&#x3002;</p>
+<p>実行した結果をまとめてみると、この絵文字を含む文字列においてはCode PointとCode Unitが異なる値となることがわかります。</p>
+<p><img src="img/emoji-codeunit-codepoint-table.png" alt="絵文字を含んだ文字列におけるCode UnitとCode Pointの表"></img></p>
+<p>具体的には、Code Pointの要素数が4つなのに対して、Code Unitの要素数が5つになっています。
+また、Code Pointでは1つのCode Pointが<code>🍎</code>に対応していますが、Code Unitでは2つのCode Unitで<code>🍎</code>に対応しています。JavaScriptでは「文字列はCode Unitが順番に並んだもの」として扱われるためこの文字列の要素数（長さ）はCode Unitの個数である5つとなっています。</p>
+<p>ある1つの文字に対応するIDであるCode Pointを、16ビット（2バイト）のCode Unitで表現するのがUTF-16というエンコード方式です。しかし、16ビット（2バイト）で表現できる範囲は、65536種類（2の16乗）です。
+現在、Unicodeに登録されているCode Pointは10万種類を超えているため、すべての文字とCode Unitを1対1の関係で表すことができません。</p>
+<p>このような場合に、UTF-16では2つのCode Unitの組み合わせ（合計4バイト）で1つの文字（1つのCode Point）を表現します。この仕組みを<strong>サロゲートペア</strong>と呼びます。</p>
+<h2 id="surrogate-pair"><a name="surrogate-pair" class="plugin-anchor" href="#surrogate-pair"><i class="fa fa-link" aria-hidden="true"></i></a>サロゲートペア </h2>
+<p>サロゲートペアでは、2つのCode Unitの組み合わせ（合計4バイト）で1つの文字（1つのCode Point）を表現します。UTF-16では、次の範囲をサロゲートペアに利用する領域としています。</p>
 <ul>
-<li><code>\uD800</code>&#xFF5E;<code>\uDBFF</code>&#xFF1A;&#x4E0A;&#x4F4D;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#x306E;&#x7BC4;&#x56F2;</li>
-<li><code>\uDC00</code>&#xFF5E;<code>\uDFFF</code>&#xFF1A;&#x4E0B;&#x4F4D;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#x306E;&#x7BC4;&#x56F2;</li>
+<li><code>\uD800</code>～<code>\uDBFF</code>：上位サロゲートの範囲</li>
+<li><code>\uDC00</code>～<code>\uDFFF</code>：下位サロゲートの範囲</li>
 </ul>
-<p>&#x6587;&#x5B57;&#x5217;&#x4E2D;&#x306B;&#x4E0A;&#x4F4D;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#x3068;&#x4E0B;&#x4F4D;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#x306E;Code Unit&#x304C;&#x4E26;&#x3093;&#x3060;&#x5834;&#x5408;&#x306B;&#x3001;2&#x3064;&#x306E;Code Unit&#x3092;&#x7D44;&#x307F;&#x5408;&#x308F;&#x305B;&#x3066;1&#x6587;&#x5B57;&#xFF08;Code Point&#xFF09;&#x3068;&#x3057;&#x3066;&#x6271;&#x3044;&#x307E;&#x3059;&#x3002;</p>
-<p>&#x6B21;&#x306E;&#x30B3;&#x30FC;&#x30C9;&#x3067;&#x306F;&#x3001;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#x30DA;&#x30A2;&#x306E;&#x6587;&#x5B57;&#x3067;&#x3042;&#x308B;&#x300C;&#x29E3D;&#xFF08;&#x307B;&#x3063;&#x3051;&#xFF09;&#x300D;&#x3092;&#x6B21;&#x306E;2&#x3064;&#x306E;Code Unit&#x3067;&#x8868;&#x73FE;&#x3057;&#x3066;&#x3044;&#x307E;&#x3059;&#x3002;
-Code Unit&#x306E;&#x30A8;&#x30B9;&#x30B1;&#x30FC;&#x30D7;&#x30B7;&#x30FC;&#x30B1;&#x30F3;&#x30B9;&#xFF08;<code>\uXXXX</code>&#xFF09;&#x3092;2&#x3064;&#x4E26;&#x3079;&#x308B;&#x3053;&#x3068;&#x3067;<code>&#x29E3D;</code>&#x3068;&#x3044;&#x3046;&#x6587;&#x5B57;&#x3092;&#x8868;&#x73FE;&#x3067;&#x304D;&#x307E;&#x3059;&#x3002;
-&#x4E00;&#x65B9;&#x3067;&#x3001;ES2015&#x304B;&#x3089;&#x306F;Code Point&#x306E;&#x30A8;&#x30B9;&#x30B1;&#x30FC;&#x30D7;&#x30B7;&#x30FC;&#x30B1;&#x30F3;&#x30B9;&#xFF08;<code>\u{XXXX}</code>&#xFF09;&#x3082;&#x66F8;&#x3051;&#x308B;&#x305F;&#x3081;&#x3001;1&#x3064;&#x306E;Code Point&#x3067;<code>&#x29E3D;</code>&#x3068;&#x3044;&#x3046;&#x6587;&#x5B57;&#x3092;&#x8868;&#x73FE;&#x3067;&#x304D;&#x308B;&#x3053;&#x3068;&#x3082;&#x308F;&#x304B;&#x308A;&#x307E;&#x3059;&#x3002;&#x3057;&#x304B;&#x3057;&#x3001;Code Point&#x306E;&#x30A8;&#x30B9;&#x30B1;&#x30FC;&#x30D7;&#x30B7;&#x30FC;&#x30B1;&#x30F3;&#x30B9;&#x3067;&#x66F8;&#x3044;&#x305F;&#x5834;&#x5408;&#x3067;&#x3082;&#x3001;&#x5185;&#x90E8;&#x7684;&#x306B;Code Unit&#x306B;&#x5909;&#x63DB;&#x3055;&#x308C;&#x305F;&#x5024;&#x3067;&#x4FDD;&#x6301;&#x3055;&#x308C;&#x308B;&#x3053;&#x3068;&#x306F;&#x5909;&#x308F;&#x308A;&#x307E;&#x305B;&#x3093;&#x3002;</p>
+<p>文字列中に上位サロゲートと下位サロゲートのCode Unitが並んだ場合に、2つのCode Unitを組み合わせて1文字（Code Point）として扱います。</p>
+<p>次のコードでは、サロゲートペアの文字である「𩸽（ほっけ）」を次の2つのCode Unitで表現しています。
+Code Unitのエスケープシーケンス（<code>\uXXXX</code>）を2つ並べることで<code>𩸽</code>という文字を表現できます。
+一方で、ES2015からはCode Pointのエスケープシーケンス（<code>\u{XXXX}</code>）も書けるため、1つのCode Pointで<code>𩸽</code>という文字を表現できることもわかります。しかし、Code Pointのエスケープシーケンスで書いた場合でも、内部的にCode Unitに変換された値で保持されることは変わりません。</p>
 <p><a class="gitbook-plugin-js-console" aria-hidden="true"></a></p>
-<pre><code class="lang-js"><span class="hljs-comment">// &#x4E0A;&#x4F4D;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8; + &#x4E0B;&#x4F4D;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#x306E;&#x7D44;&#x307F;&#x5408;&#x308F;&#x305B;</span>
-<span class="hljs-built_in">console</span>.log(<span class="hljs-string">&quot;\uD867\uDE3D&quot;</span>); <span class="hljs-comment">// =&gt; &quot;&#x29E3D;&quot;</span>
-<span class="hljs-comment">// Code Point&#x3067;&#x306E;&#x8868;&#x73FE;</span>
-<span class="hljs-built_in">console</span>.log(<span class="hljs-string">&quot;\u{29e3d}&quot;</span>); <span class="hljs-comment">// =&gt; &quot;&#x29E3D;&quot;</span>
+<pre><code class="lang-js"><span class="hljs-comment">// 上位サロゲート + 下位サロゲートの組み合わせ</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">"\uD867\uDE3D"</span>); <span class="hljs-comment">// =&gt; "𩸽"</span>
+<span class="hljs-comment">// Code Pointでの表現</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">"\u{29e3d}"</span>); <span class="hljs-comment">// =&gt; "𩸽"</span>
 </code></pre>
-<p>&#x5148;&#x307B;&#x3069;&#x306E;&#x4F8B;&#x3067;&#x767B;&#x5834;&#x3057;&#x305F;<code>&#x1F34E;</code>&#xFF08;&#x30EA;&#x30F3;&#x30B4;&#x306E;&#x7D75;&#x6587;&#x5B57;&#xFF09;&#x3082;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#x30DA;&#x30A2;&#x3067;&#x8868;&#x73FE;&#x3055;&#x308C;&#x308B;&#x6587;&#x5B57;&#x3067;&#x3059;&#x3002;</p>
+<p>先ほどの例で登場した<code>🍎</code>（リンゴの絵文字）もサロゲートペアで表現される文字です。</p>
 <p><a class="gitbook-plugin-js-console" aria-hidden="true"></a></p>
-<pre><code class="lang-js"><span class="hljs-comment">// Code Unit&#xFF08;&#x4E0A;&#x4F4D;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8; + &#x4E0B;&#x4F4D;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#xFF09;</span>
-<span class="hljs-built_in">console</span>.log(<span class="hljs-string">&quot;\uD83C\uDF4E&quot;</span>); <span class="hljs-comment">// =&gt; &quot;&#x1F34E;&quot;</span>
+<pre><code class="lang-js"><span class="hljs-comment">// Code Unit（上位サロゲート + 下位サロゲート）</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">"\uD83C\uDF4E"</span>); <span class="hljs-comment">// =&gt; "🍎"</span>
 <span class="hljs-comment">// Code Point</span>
-<span class="hljs-built_in">console</span>.log(<span class="hljs-string">&quot;\u{1F34E}&quot;</span>); <span class="hljs-comment">// =&gt; &quot;&#x1F34E;&quot;</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">"\u{1F34E}"</span>); <span class="hljs-comment">// =&gt; "🍎"</span>
 </code></pre>
-<p>&#x3053;&#x306E;&#x3088;&#x3046;&#x306B;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#x30DA;&#x30A2;&#x3067;&#x306F;&#x3001;2&#x3064;&#x306E;Code Unit&#x3067;1&#x3064;&#x306E;Code Point&#x3092;&#x8868;&#x73FE;&#x3057;&#x307E;&#x3059;&#x3002;</p>
-<p>&#x57FA;&#x672C;&#x7684;&#x306B;&#x306F;&#x3001;&#x6587;&#x5B57;&#x5217;&#x306F;Code Unit&#x304C;&#x9806;&#x756A;&#x306B;&#x4E26;&#x3093;&#x3067;&#x3044;&#x308B;&#x3082;&#x306E;&#x3068;&#x3057;&#x3066;&#x6271;&#x308F;&#x308C;&#x308B;&#x305F;&#x3081;&#x3001;&#x591A;&#x304F;&#x306E;<code>String</code>&#x306E;&#x30E1;&#x30BD;&#x30C3;&#x30C9;&#x306F;Code Unit&#x3054;&#x3068;&#x306B;&#x4F5C;&#x7528;&#x3057;&#x307E;&#x3059;&#x3002;
-&#x307E;&#x305F;&#x3001;&#x30A4;&#x30F3;&#x30C7;&#x30C3;&#x30AF;&#x30B9;&#x30A2;&#x30AF;&#x30BB;&#x30B9;&#x3082;Code Unit&#x3054;&#x3068;&#x3068;&#x306A;&#x308A;&#x307E;&#x3059;&#x3002;&#x305D;&#x306E;&#x305F;&#x3081;&#x3001;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#x30DA;&#x30A2;&#x3067;&#x8868;&#x73FE;&#x3057;&#x3066;&#x3044;&#x308B;&#x6587;&#x5B57;&#x5217;&#x3067;&#x306F;&#x3001;&#x4E0A;&#x4F4D;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#xFF08;0&#x756A;&#x76EE;&#xFF09;&#x3068;&#x4E0B;&#x4F4D;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#xFF08;1&#x756A;&#x76EE;&#xFF09;&#x3078;&#x306E;&#x30A4;&#x30F3;&#x30C7;&#x30C3;&#x30AF;&#x30B9;&#x30A2;&#x30AF;&#x30BB;&#x30B9;&#x306B;&#x306A;&#x308A;&#x307E;&#x3059;&#x3002;</p>
+<p>このようにサロゲートペアでは、2つのCode Unitで1つのCode Pointを表現します。</p>
+<p>基本的には、文字列はCode Unitが順番に並んでいるものとして扱われるため、多くの<code>String</code>のメソッドはCode Unitごとに作用します。
+また、インデックスアクセスもCode Unitごととなります。そのため、サロゲートペアで表現している文字列では、上位サロゲート（0番目）と下位サロゲート（1番目）へのインデックスアクセスになります。</p>
 <p><a class="gitbook-plugin-js-console" aria-hidden="true"></a></p>
-<pre><code class="lang-js"><span class="hljs-comment">// &#x5185;&#x90E8;&#x7684;&#x306B;&#x306F;Code Unit&#x304C;&#x4E26;&#x3093;&#x3067;&#x3044;&#x308B;&#x3082;&#x306E;&#x3068;&#x3057;&#x3066;&#x6271;&#x308F;&#x308C;&#x3066;&#x3044;&#x308B;</span>
-<span class="hljs-built_in">console</span>.log(<span class="hljs-string">&quot;\uD867\uDE3D&quot;</span>); <span class="hljs-comment">// =&gt; &quot;&#x29E3D;&quot;</span>
-<span class="hljs-comment">// &#x30A4;&#x30F3;&#x30C7;&#x30C3;&#x30AF;&#x30B9;&#x30A2;&#x30AF;&#x30BB;&#x30B9;&#x3082;Code Unit&#x3054;&#x3068;&#x3068;&#x306A;&#x308B;</span>
-<span class="hljs-built_in">console</span>.log(<span class="hljs-string">&quot;&#x29E3D;&quot;</span>[<span class="hljs-number">0</span>]); <span class="hljs-comment">// =&gt; &quot;\uD867&quot;</span>
-<span class="hljs-built_in">console</span>.log(<span class="hljs-string">&quot;&#x29E3D;&quot;</span>[<span class="hljs-number">1</span>]); <span class="hljs-comment">// =&gt; &quot;\uDE3D&quot;</span>
+<pre><code class="lang-js"><span class="hljs-comment">// 内部的にはCode Unitが並んでいるものとして扱われている</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">"\uD867\uDE3D"</span>); <span class="hljs-comment">// =&gt; "𩸽"</span>
+<span class="hljs-comment">// インデックスアクセスもCode Unitごととなる</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">"𩸽"</span>[<span class="hljs-number">0</span>]); <span class="hljs-comment">// =&gt; "\uD867"</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">"𩸽"</span>[<span class="hljs-number">1</span>]); <span class="hljs-comment">// =&gt; "\uDE3D"</span>
 </code></pre>
-<p>&#x7D75;&#x6587;&#x5B57;&#x3084;&#x300C;&#x29E3D;&#xFF08;&#x307B;&#x3063;&#x3051;&#xFF09;&#x300D;&#x306A;&#x3069;&#x306E;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#x30DA;&#x30A2;&#x3067;&#x8868;&#x73FE;&#x3055;&#x308C;&#x308B;&#x6587;&#x5B57;&#x304C;&#x6587;&#x5B57;&#x5217;&#x4E2D;&#x306B;&#x542B;&#x307E;&#x308C;&#x308C;&#x308B;&#x3068;&#x3001;Code Unit&#x3054;&#x3068;&#x306B;&#x6271;&#x3046;&#x6587;&#x5B57;&#x5217;&#x51E6;&#x7406;&#x306F;&#x8907;&#x96D1;&#x306B;&#x306A;&#x308A;&#x307E;&#x3059;&#x3002;</p>
-<p>&#x305F;&#x3068;&#x3048;&#x3070;&#x3001;<code>String#length</code>&#x30D7;&#x30ED;&#x30D1;&#x30C6;&#x30A3;&#x306F;&#x6587;&#x5B57;&#x5217;&#x306B;&#x304A;&#x3051;&#x308B;Code Unit&#x306E;&#x8981;&#x7D20;&#x6570;&#x3092;&#x6570;&#x3048;&#x308B;&#x305F;&#x3081;&#x3001;<code>&quot;&#x1F34E;&quot;.length</code>&#x306E;&#x7D50;&#x679C;&#x306F;<code>2</code>&#x3068;&#x306A;&#x308A;&#x307E;&#x3059;&#x3002;</p>
-<pre><code class="lang-js"><span class="hljs-built_in">console</span>.log(<span class="hljs-string">&quot;&#x1F34E;&quot;</span>.length); <span class="hljs-comment">// =&gt; 2</span>
+<p>絵文字や「𩸽（ほっけ）」などのサロゲートペアで表現される文字が文字列中に含まれると、Code Unitごとに扱う文字列処理は複雑になります。</p>
+<p>たとえば、Stringの<code>length</code>プロパティは文字列におけるCode Unitの要素数を数えるため、<code>"🍎".length</code>の結果は<code>2</code>となります。</p>
+<pre><code class="lang-js"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">"🍎"</span>.<span class="hljs-property">length</span>); <span class="hljs-comment">// =&gt; 2</span>
 </code></pre>
-<p>&#x3053;&#x306E;&#x3088;&#x3046;&#x306A;&#x5834;&#x5408;&#x306B;&#x306F;&#x3001;&#x6587;&#x5B57;&#x5217;&#x3092;Code Point&#x3054;&#x3068;&#x306B;&#x51E6;&#x7406;&#x3059;&#x308B;&#x3053;&#x3068;&#x3092;&#x8003;&#x3048;&#x308B;&#x5FC5;&#x8981;&#x304C;&#x3042;&#x308A;&#x307E;&#x3059;&#x3002;</p>
-<h2 id="handle-code-point"><a name="handle-code-point" class="plugin-anchor" href="#handle-code-point"><i class="fa fa-link" aria-hidden="true"></i></a>Code Point&#x3092;&#x6271;&#x3046; </h2>
-<p>&#x6587;&#x5B57;&#x5217;&#x3092;Code Point&#x304C;&#x9806;&#x756A;&#x306B;&#x4E26;&#x3093;&#x3060;&#x3082;&#x306E;&#x3068;&#x3057;&#x3066;&#x6271;&#x3046;&#x306B;&#x306F;&#x3001;Code Point&#x306B;&#x5BFE;&#x5FDC;&#x3057;&#x305F;&#x30E1;&#x30BD;&#x30C3;&#x30C9;&#x306A;&#x3069;&#x3092;&#x5229;&#x7528;&#x3059;&#x308B;&#x5FC5;&#x8981;&#x304C;&#x3042;&#x308A;&#x307E;&#x3059;&#x3002;</p>
-<p>ES2015&#x304B;&#x3089;&#x6587;&#x5B57;&#x5217;&#x3092;Code Point&#x3054;&#x3068;&#x306B;&#x6271;&#x3046;&#x30E1;&#x30BD;&#x30C3;&#x30C9;&#x3084;&#x69CB;&#x6587;&#x304C;&#x8FFD;&#x52A0;&#x3055;&#x308C;&#x3066;&#x3044;&#x307E;&#x3059;&#x3002;
-&#x6B21;&#x306B;&#x7D39;&#x4ECB;&#x3059;&#x308B;&#x3082;&#x306E;&#x306F;&#x3001;&#x6587;&#x5B57;&#x5217;&#x3092;Code Point&#x3054;&#x3068;&#x306B;&#x6271;&#x3044;&#x307E;&#x3059;&#x3002;</p>
+<p>このような場合には、文字列をCode Pointごとに処理することを考える必要があります。</p>
+<h2 id="handle-code-point"><a name="handle-code-point" class="plugin-anchor" href="#handle-code-point"><i class="fa fa-link" aria-hidden="true"></i></a>Code Pointを扱う </h2>
+<p>文字列をCode Pointが順番に並んだものとして扱うには、Code Pointに対応したメソッドなどを利用する必要があります。</p>
+<p>ES2015から文字列をCode Pointごとに扱うメソッドや構文が追加されています。
+次に紹介するものは、文字列をCode Pointごとに扱います。</p>
 <ul>
-<li><code>CodePoint</code>&#x3092;&#x540D;&#x524D;&#x306B;&#x542B;&#x3080;&#x30E1;&#x30BD;&#x30C3;&#x30C9;</li>
-<li><code>u</code>&#xFF08;Unicode&#xFF09;&#x30D5;&#x30E9;&#x30B0;&#x304C;&#x6709;&#x52B9;&#x5316;&#x3055;&#x308C;&#x3066;&#x3044;&#x308B;&#x6B63;&#x898F;&#x8868;&#x73FE;</li>
-<li>&#x6587;&#x5B57;&#x5217;&#x306E;Iterator&#x3092;&#x6271;&#x3046;&#x3082;&#x306E;&#xFF08;Destructuring&#x3001;<code>for...of</code>&#x3001;<code>Array.from</code>&#x30E1;&#x30BD;&#x30C3;&#x30C9;&#x306A;&#x3069;&#xFF09;</li>
+<li><code>CodePoint</code>を名前に含むメソッド</li>
+<li><code>u</code>（Unicode）フラグが有効化されている正規表現</li>
+<li>文字列のIteratorを扱うもの（Destructuring、<code>for...of</code>、<code>Array.from</code>メソッドなど）</li>
 </ul>
-<p>&#x3053;&#x308C;&#x3089;&#x306E;Code Point&#x3092;&#x6271;&#x3046;&#x51E6;&#x7406;&#x3068;&#x5177;&#x4F53;&#x7684;&#x306A;&#x4F7F;&#x3044;&#x65B9;&#x3092;&#x898B;&#x3066;&#x3044;&#x304D;&#x307E;&#x3059;&#x3002;</p>
-<h3 id="regexp-unicode"><a name="regexp-unicode" class="plugin-anchor" href="#regexp-unicode"><i class="fa fa-link" aria-hidden="true"></i></a>&#x6B63;&#x898F;&#x8868;&#x73FE;&#x306E;<code>.</code>&#x3068;Unicode </h3>
-<p>ES2015&#x3067;&#x306F;&#x3001;&#x6B63;&#x898F;&#x8868;&#x73FE;&#x306B;<code>u</code>&#xFF08;Unicode&#xFF09;&#x30D5;&#x30E9;&#x30B0;&#x304C;&#x8FFD;&#x52A0;&#x3055;&#x308C;&#x307E;&#x3057;&#x305F;&#x3002;
-&#x3053;&#x306E;<code>u</code>&#x30D5;&#x30E9;&#x30B0;&#x3092;&#x3064;&#x3051;&#x305F;&#x6B63;&#x898F;&#x8868;&#x73FE;&#x306F;&#x3001;&#x6587;&#x5B57;&#x5217;&#x3092;Code Point&#x304C;&#x9806;&#x756A;&#x306B;&#x4E26;&#x3093;&#x3060;&#x3082;&#x306E;&#x3068;&#x3057;&#x3066;&#x6271;&#x3044;&#x307E;&#x3059;&#x3002;</p>
-<p>&#x5177;&#x4F53;&#x7684;&#x306B;<code>u</code>&#x30D5;&#x30E9;&#x30B0;&#x306E;&#x6709;&#x7121;&#x306B;&#x3088;&#x308B;<code>.</code>&#xFF08;&#x6539;&#x884C;&#x6587;&#x5B57;&#x4EE5;&#x5916;&#x306E;&#x3069;&#x306E;1&#x6587;&#x5B57;&#x306B;&#x3082;&#x30DE;&#x30C3;&#x30C1;&#x3059;&#x308B;&#x7279;&#x6B8A;&#x6587;&#x5B57;&#xFF09;&#x306E;&#x52D5;&#x4F5C;&#x306E;&#x9055;&#x3044;&#x3092;&#x898B;&#x3066;&#x3044;&#x304D;&#x307E;&#x3059;&#x3002;</p>
-<p><code>/(.)&#x306E;&#x3072;&#x3089;&#x304D;/</code>&#x3068;&#x3044;&#x3046;&#x30D1;&#x30BF;&#x30FC;&#x30F3;&#x3067;<code>.</code>&#x306B;&#x30DE;&#x30C3;&#x30C1;&#x3059;&#x308B;&#x90E8;&#x5206;&#x3092;&#x53D6;&#x308A;&#x51FA;&#x3059;&#x3053;&#x3068;&#x3092;&#x4F8B;&#x306B;&#x898B;&#x3066;&#x3044;&#x304D;&#x307E;&#x3059;&#x3002;</p>
-<p>&#x307E;&#x305A;&#x306F;&#x3001;<code>u</code>&#x30D5;&#x30E9;&#x30B0;&#x3092;&#x3064;&#x3051;&#x3066;&#x3044;&#x306A;&#x3044;&#x6B63;&#x898F;&#x8868;&#x73FE;&#x3068;<code>String#match</code>&#x30E1;&#x30BD;&#x30C3;&#x30C9;&#x3067;&#x30DE;&#x30C3;&#x30C1;&#x3057;&#x305F;&#x7BC4;&#x56F2;&#x3092;&#x53D6;&#x308A;&#x51FA;&#x3057;&#x3066;&#x307F;&#x307E;&#x3059;&#x3002;<code>match</code>&#x30E1;&#x30BD;&#x30C3;&#x30C9;&#x306E;&#x8FD4;&#x3059;&#x5024;&#x306F;<code>[&#x30DE;&#x30C3;&#x30C1;&#x3057;&#x305F;&#x5168;&#x4F53;&#x306E;&#x6587;&#x5B57;&#x5217;, &#x30AD;&#x30E3;&#x30D7;&#x30C1;&#x30E3;&#x3055;&#x308C;&#x305F;&#x6587;&#x5B57;&#x5217;]</code>&#x3067;&#x3059;&#xFF08;&#x8A73;&#x7D30;&#x306F;&#x300C;<a href="../string/">&#x6587;&#x5B57;&#x5217;</a>&#x300D;&#x306E;&#x7AE0;&#x3092;&#x53C2;&#x7167;&#xFF09;&#x3002;</p>
-<p>&#x5B9F;&#x969B;&#x306B;&#x30DE;&#x30C3;&#x30C1;&#x3057;&#x305F;&#x7D50;&#x679C;&#x3092;&#x898B;&#x3066;&#x307F;&#x308B;&#x3068;&#x3001;<code>.</code>&#x306F;<code>&#x29E3D;</code>&#x306E;&#x4E0B;&#x4F4D;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#x3067;&#x3042;&#x308B;<code>\ude3d</code>&#x306B;&#x30DE;&#x30C3;&#x30C1;&#x3057;&#x3066;&#x3044;&#x308B;&#x3053;&#x3068;&#x304C;&#x308F;&#x304B;&#x308A;&#x307E;&#x3059;&#xFF08;<code>\ude3d</code>&#x306F;&#x5358;&#x72EC;&#x3067;&#x306F;&#x8868;&#x793A;&#x3067;&#x304D;&#x306A;&#x3044;&#x305F;&#x3081;&#x3001;&#x6587;&#x5B57;&#x5316;&#x3051;&#x306E;&#x3088;&#x3046;&#x306B;&#x8868;&#x793A;&#x3055;&#x308C;&#x307E;&#x3059;&#xFF09;&#x3002;</p>
+<p>これらのCode Pointを扱う処理と具体的な使い方を見ていきます。</p>
+<h3 id="regexp-unicode"><a name="regexp-unicode" class="plugin-anchor" href="#regexp-unicode"><i class="fa fa-link" aria-hidden="true"></i></a>正規表現の<code>.</code>とUnicode </h3>
+<p>ES2015では、正規表現に<code>u</code>（Unicode）フラグが追加されました。
+この<code>u</code>フラグをつけた正規表現は、文字列をCode Pointが順番に並んだものとして扱います。</p>
+<p>具体的に<code>u</code>フラグの有無による<code>.</code>（改行文字以外のどの1文字にもマッチする特殊文字）の動作の違いを見ていきます。</p>
+<p><code>/(.)のひらき/</code>というパターンで<code>.</code>にマッチする部分を取り出すことを例に見ていきます。</p>
+<p>まずは、<code>u</code>フラグをつけていない正規表現とStringの<code>match</code>メソッドでマッチした範囲を取り出してみます。
+<code>match</code>メソッドの返す値は<code>[マッチした全体の文字列, キャプチャされた文字列]</code>です（詳細は「<a href="../string/">文字列</a>」の章を参照）。</p>
+<p>実際にマッチした結果を見てみると、<code>.</code>は<code>𩸽</code>の下位サロゲートである<code>\ude3d</code>にマッチしていることがわかります（<code>\ude3d</code>は単独では表示できないため、文字化けのように表示されます）。</p>
 <p><a class="gitbook-plugin-js-console" aria-hidden="true"></a></p>
-<pre><code class="lang-js"><span class="hljs-keyword">const</span> [all, fish] = <span class="hljs-string">&quot;&#x29E3D;&#x306E;&#x3072;&#x3089;&#x304D;&quot;</span>.match(<span class="hljs-regexp">/(.)&#x306E;&#x3072;&#x3089;&#x304D;/</span>);
-<span class="hljs-built_in">console</span>.log(all); <span class="hljs-comment">// =&gt; &quot;\ude3d&#x306E;&#x3072;&#x3089;&#x304D;&quot;</span>
-<span class="hljs-built_in">console</span>.log(fish); <span class="hljs-comment">// =&gt; &quot;\ude3d&quot;</span>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> [all, fish] = <span class="hljs-string">"𩸽のひらき"</span>.<span class="hljs-title function_">match</span>(<span class="hljs-regexp">/(.)のひらき/</span>);
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(all); <span class="hljs-comment">// =&gt; "\ude3dのひらき"</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(fish); <span class="hljs-comment">// =&gt; "\ude3d"</span>
 </code></pre>
-<p>&#x3064;&#x307E;&#x308A;&#x3001;<code>u</code>&#x30D5;&#x30E9;&#x30B0;&#x3092;&#x3064;&#x3051;&#x3066;&#x3044;&#x306A;&#x3044;&#x6B63;&#x898F;&#x8868;&#x73FE;&#x306F;&#x3001;&#x6587;&#x5B57;&#x5217;&#x3092;Code Unit&#x304C;&#x9806;&#x756A;&#x306B;&#x4E26;&#x3093;&#x3060;&#x3082;&#x306E;&#x3068;&#x3057;&#x3066;&#x6271;&#x3063;&#x3066;&#x3044;&#x307E;&#x3059;&#x3002;</p>
-<p>&#x3053;&#x306E;&#x3088;&#x3046;&#x306A;&#x610F;&#x56F3;&#x3057;&#x306A;&#x3044;&#x7D50;&#x679C;&#x3092;&#x907F;&#x3051;&#x308B;&#x306B;&#x306F;&#x3001;&#x6B63;&#x898F;&#x8868;&#x73FE;&#x306B;<code>u</code>&#x30D5;&#x30E9;&#x30B0;&#x3092;&#x3064;&#x3051;&#x307E;&#x3059;&#x3002;
-<code>u</code>&#x30D5;&#x30E9;&#x30B0;&#x304C;&#x3064;&#x3044;&#x305F;&#x6B63;&#x898F;&#x8868;&#x73FE;&#x306F;&#x3001;&#x6587;&#x5B57;&#x5217;&#x3092;Code Point&#x3054;&#x3068;&#x306B;&#x6271;&#x3044;&#x307E;&#x3059;&#x3002;
-&#x305D;&#x306E;&#x305F;&#x3081;&#x3001;&#x4EFB;&#x610F;&#x306E;1&#x6587;&#x5B57;&#x306B;&#x30DE;&#x30C3;&#x30C1;&#x3059;&#x308B;<code>.</code>&#x304C;<code>&#x29E3D;</code>&#x3068;&#x3044;&#x3046;&#x6587;&#x5B57;&#xFF08;Code Point&#xFF09;&#x306B;&#x30DE;&#x30C3;&#x30C1;&#x3057;&#x307E;&#x3059;&#x3002;</p>
+<p>つまり、<code>u</code>フラグをつけていない正規表現は、文字列をCode Unitが順番に並んだものとして扱っています。</p>
+<p>このような意図しない結果を避けるには、正規表現に<code>u</code>フラグをつけます。
+<code>u</code>フラグがついた正規表現は、文字列をCode Pointごとに扱います。
+そのため、任意の1文字にマッチする<code>.</code>が<code>𩸽</code>という文字（Code Point）にマッチします。</p>
 <p><a class="gitbook-plugin-js-console" aria-hidden="true"></a></p>
-<pre><code class="lang-js"><span class="hljs-keyword">const</span> [all, fish] = <span class="hljs-string">&quot;&#x29E3D;&#x306E;&#x3072;&#x3089;&#x304D;&quot;</span>.match(<span class="hljs-regexp">/(.)&#x306E;&#x3072;&#x3089;&#x304D;/u</span>);
-<span class="hljs-built_in">console</span>.log(all); <span class="hljs-comment">// =&gt; &quot;&#x29E3D;&#x306E;&#x3072;&#x3089;&#x304D;&quot;</span>
-<span class="hljs-built_in">console</span>.log(fish); <span class="hljs-comment">// =&gt; &quot;&#x29E3D;&quot;</span>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> [all, fish] = <span class="hljs-string">"𩸽のひらき"</span>.<span class="hljs-title function_">match</span>(<span class="hljs-regexp">/(.)のひらき/u</span>);
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(all); <span class="hljs-comment">// =&gt; "𩸽のひらき"</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(fish); <span class="hljs-comment">// =&gt; "𩸽"</span>
 </code></pre>
-<p>&#x57FA;&#x672C;&#x7684;&#x306B;&#x306F;&#x6B63;&#x898F;&#x8868;&#x73FE;&#x306B;<code>u</code>&#x30D5;&#x30E9;&#x30B0;&#x3092;&#x3064;&#x3051;&#x3066;&#x554F;&#x984C;&#x3068;&#x306A;&#x308B;&#x30B1;&#x30FC;&#x30B9;&#x306F;&#x5C11;&#x306A;&#x3044;&#x306F;&#x305A;&#x3067;&#x3059;&#x3002;
-&#x306A;&#x305C;&#x306A;&#x3089;&#x3001;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#x30DA;&#x30A2;&#x306E;&#x7247;&#x65B9;&#x3060;&#x3051;&#x306B;&#x30DE;&#x30C3;&#x30C1;&#x3057;&#x305F;&#x3044;&#x6B63;&#x898F;&#x8868;&#x73FE;&#x3092;&#x66F8;&#x304F;&#x30B1;&#x30FC;&#x30B9;&#x306F;&#x307E;&#x308C;&#x3067;&#x3042;&#x308B;&#x305F;&#x3081;&#x3067;&#x3059;&#x3002;</p>
+<p>基本的には正規表現に<code>u</code>フラグをつけて問題となるケースは少ないはずです。
+なぜなら、サロゲートペアの片方だけにマッチしたい正規表現を書くケースはまれであるためです。</p>
 <!-- TODO: この文いらない可能性高い -->
-<h3 id="count-of-code-points"><a name="count-of-code-points" class="plugin-anchor" href="#count-of-code-points"><i class="fa fa-link" aria-hidden="true"></i></a>Code Point&#x306E;&#x6570;&#x3092;&#x6570;&#x3048;&#x308B; </h3>
-<p><code>String#length</code>&#x30D7;&#x30ED;&#x30D1;&#x30C6;&#x30A3;&#x306F;&#x3001;&#x6587;&#x5B57;&#x5217;&#x3092;&#x69CB;&#x6210;&#x3059;&#x308B;Code Unit&#x306E;&#x500B;&#x6570;&#x3092;&#x8868;&#x3059;&#x30D7;&#x30ED;&#x30D1;&#x30C6;&#x30A3;&#x3067;&#x3059;&#x3002;
-&#x305D;&#x306E;&#x305F;&#x3081;&#x30B5;&#x30ED;&#x30B2;&#x30FC;&#x30C8;&#x30DA;&#x30A2;&#x3092;&#x542B;&#x3080;&#x6587;&#x5B57;&#x5217;&#x3067;&#x306F;&#x3001;<code>length</code>&#x306E;&#x7D50;&#x679C;&#x304C;&#x898B;&#x305F;&#x76EE;&#x3088;&#x308A;&#x5927;&#x304D;&#x306A;&#x5024;&#x3068;&#x306A;&#x308B;&#x5834;&#x5408;&#x304C;&#x3042;&#x308A;&#x307E;&#x3059;&#x3002;</p>
+<h3 id="count-of-code-points"><a name="count-of-code-points" class="plugin-anchor" href="#count-of-code-points"><i class="fa fa-link" aria-hidden="true"></i></a>Code Pointの数を数える </h3>
+<p>Stringの<code>length</code>プロパティは、文字列を構成するCode Unitの個数を表すプロパティです。
+そのためサロゲートペアを含む文字列では、<code>length</code>の結果が見た目より大きな値となる場合があります。</p>
 <p><a class="gitbook-plugin-js-console" aria-hidden="true"></a></p>
-<pre><code class="lang-js"><span class="hljs-comment">// Code Unit&#x306E;&#x500B;&#x6570;&#x3092;&#x8FD4;&#x3059;</span>
-<span class="hljs-built_in">console</span>.log(<span class="hljs-string">&quot;&#x1F34E;&quot;</span>.length); <span class="hljs-comment">// =&gt; 2</span>
-<span class="hljs-built_in">console</span>.log(<span class="hljs-string">&quot;\uD83C\uDF4E&quot;</span>); <span class="hljs-comment">// =&gt; &quot;&#x1F34E;&quot;</span>
-<span class="hljs-built_in">console</span>.log(<span class="hljs-string">&quot;\uD83C\uDF4E&quot;</span>.length); <span class="hljs-comment">// =&gt; 2</span>
+<pre><code class="lang-js"><span class="hljs-comment">// Code Unitの個数を返す</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">"🍎"</span>.<span class="hljs-property">length</span>); <span class="hljs-comment">// =&gt; 2</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">"\uD83C\uDF4E"</span>); <span class="hljs-comment">// =&gt; "🍎"</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">"\uD83C\uDF4E"</span>.<span class="hljs-property">length</span>); <span class="hljs-comment">// =&gt; 2</span>
 </code></pre>
-<p>JavaScript&#x306B;&#x306F;&#x3001;&#x6587;&#x5B57;&#x5217;&#x306B;&#x304A;&#x3051;&#x308B;Code Point&#x306E;&#x500B;&#x6570;&#x3092;&#x6570;&#x3048;&#x308B;&#x30E1;&#x30BD;&#x30C3;&#x30C9;&#x306F;&#x7528;&#x610F;&#x3055;&#x308C;&#x3066;&#x3044;&#x307E;&#x305B;&#x3093;&#x3002;
-&#x3053;&#x308C;&#x3092;&#x884C;&#x3046;&#x306B;&#x306F;&#x3001;&#x6587;&#x5B57;&#x5217;&#x3092;Code Point&#x3054;&#x3068;&#x306B;&#x533A;&#x5207;&#x3063;&#x305F;&#x914D;&#x5217;&#x3078;&#x5909;&#x63DB;&#x3057;&#x3066;&#x3001;&#x914D;&#x5217;&#x306E;&#x9577;&#x3055;&#x3092;&#x6570;&#x3048;&#x308B;&#x306E;&#x304C;&#x7C21;&#x6F54;&#x3067;&#x3059;&#x3002;</p>
-<p><code>Array.from</code>&#x30E1;&#x30BD;&#x30C3;&#x30C9;<sup>[ES2015]</sup>&#x306F;&#x3001;&#x5F15;&#x6570;&#x306B;iterable&#x306A;&#x30AA;&#x30D6;&#x30B8;&#x30A7;&#x30AF;&#x30C8;&#x3092;&#x53D7;&#x3051;&#x53D6;&#x308A;&#x3001;&#x305D;&#x308C;&#x3092;&#x5143;&#x306B;&#x3057;&#x305F;&#x65B0;&#x3057;&#x3044;&#x914D;&#x5217;&#x3092;&#x8FD4;&#x3057;&#x307E;&#x3059;&#x3002;
-iterable&#x30AA;&#x30D6;&#x30B8;&#x30A7;&#x30AF;&#x30C8;&#x3068;&#x306F;<code>Symbol.iterator</code>&#x3068;&#x3044;&#x3046;&#x7279;&#x5225;&#x306A;&#x540D;&#x524D;&#x306E;&#x30E1;&#x30BD;&#x30C3;&#x30C9;&#x3092;&#x5B9F;&#x88C5;&#x3057;&#x305F;&#x30AA;&#x30D6;&#x30B8;&#x30A7;&#x30AF;&#x30C8;&#x306E;&#x7DCF;&#x79F0;&#x3067;&#x3001;<code>for...of</code>&#x6587;&#x306A;&#x3069;&#x3067;&#x53CD;&#x5FA9;&#x51E6;&#x7406;&#x304C;&#x53EF;&#x80FD;&#x306A;&#x30AA;&#x30D6;&#x30B8;&#x30A7;&#x30AF;&#x30C8;&#x3067;&#x3059;&#xFF08;&#x8A73;&#x7D30;&#x306F;&#x300C;<a href="../loop/#for-of-statement">&#x30EB;&#x30FC;&#x30D7;&#x3068;&#x53CD;&#x5FA9;&#x51E6;&#x7406;&#x306E;for...of&#x6587;</a>&#x300D;&#x3092;&#x53C2;&#x7167;&#xFF09;&#x3002;</p>
-<p>&#x6587;&#x5B57;&#x5217;&#x3082;iterable&#x30AA;&#x30D6;&#x30B8;&#x30A7;&#x30AF;&#x30C8;&#x3067;&#x3042;&#x308B;&#x305F;&#x3081;&#x3001;<code>Array.from</code>&#x30E1;&#x30BD;&#x30C3;&#x30C9;&#x306B;&#x3088;&#x3063;&#x3066;1&#x6587;&#x5B57;&#xFF08;&#x53B3;&#x5BC6;&#x306B;&#x306F;Code Point&#xFF09;&#x3054;&#x3068;&#x533A;&#x5207;&#x3063;&#x305F;&#x914D;&#x5217;&#x3078;&#x3068;&#x5909;&#x63DB;&#x3067;&#x304D;&#x307E;&#x3059;&#x3002;&#x5148;&#x307B;&#x3069;&#x3082;&#x7D39;&#x4ECB;&#x3057;&#x305F;&#x3088;&#x3046;&#x306B;&#x3001;&#x6587;&#x5B57;&#x5217;&#x3092;iterable&#x3068;&#x3057;&#x3066;&#x6271;&#x3046;&#x5834;&#x5408;&#x306F;Code Point&#x3054;&#x3068;&#x306B;&#x51E6;&#x7406;&#x3092;&#x884C;&#x3044;&#x307E;&#x3059;&#x3002;</p>
+<p>JavaScriptには、文字列におけるCode Pointの個数を数えるメソッドは用意されていません。
+これを行うには、文字列をCode Pointごとに区切った配列へ変換して、配列の長さを数えるのが簡潔です。</p>
+<p><code>Array.from</code>メソッド<sup>[ES2015]</sup>は、引数にiterableなオブジェクトを受け取り、それを元にした新しい配列を返します。
+iterableオブジェクトとは<code>Symbol.iterator</code>という特別な名前のメソッドを実装したオブジェクトの総称で、<code>for...of</code>文などで反復処理が可能なオブジェクトです（詳細は「<a href="../loop/#for-of-statement">ループと反復処理のfor...of文</a>」を参照）。</p>
+<p>文字列もiterableオブジェクトであるため、<code>Array.from</code>メソッドによって1文字（厳密にはCode Point）ごとに区切った配列へと変換できます。先ほども紹介したように、文字列をiterableとして扱う場合はCode Pointごとに処理を行います。</p>
 <p><a class="gitbook-plugin-js-console" aria-hidden="true"></a></p>
-<pre><code class="lang-js"><span class="hljs-comment">// Code Point&#x3054;&#x3068;&#x306E;&#x914D;&#x5217;&#x306B;&#x3059;&#x308B;</span>
-<span class="hljs-comment">// Array.from&#x30E1;&#x30BD;&#x30C3;&#x30C9;&#x306F;Iterator&#x3092;&#x914D;&#x5217;&#x306B;&#x3059;&#x308B;</span>
-<span class="hljs-keyword">const</span> codePoints = <span class="hljs-built_in">Array</span>.from(<span class="hljs-string">&quot;&#x30EA;&#x30F3;&#x30B4;&#x1F34E;&quot;</span>);
-<span class="hljs-built_in">console</span>.log(codePoints); <span class="hljs-comment">// =&gt; [&quot;&#x30EA;&quot;, &quot;&#x30F3;&quot;, &quot;&#x30B4;&quot;, &quot;&#x1F34E;&quot;]</span>
-<span class="hljs-comment">// Code Point&#x306E;&#x500B;&#x6570;&#x3092;&#x6570;&#x3048;&#x308B;</span>
-<span class="hljs-built_in">console</span>.log(codePoints.length); <span class="hljs-comment">// =&gt; 4</span>
+<pre><code class="lang-js"><span class="hljs-comment">// Code Pointごとの配列にする</span>
+<span class="hljs-comment">// Array.fromメソッドはIteratorを配列にする</span>
+<span class="hljs-keyword">const</span> codePoints = <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(<span class="hljs-string">"リンゴ🍎"</span>);
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(codePoints); <span class="hljs-comment">// =&gt; ["リ", "ン", "ゴ", "🍎"]</span>
+<span class="hljs-comment">// Code Pointの個数を数える</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(codePoints.<span class="hljs-property">length</span>); <span class="hljs-comment">// =&gt; 4</span>
 </code></pre>
-<p>&#x3057;&#x304B;&#x3057;&#x3001;Code Point&#x306E;&#x6570;&#x3092;&#x6570;&#x3048;&#x305F;&#x5834;&#x5408;&#x3067;&#x3082;&#x3001;&#x76F4;&#x611F;&#x7684;&#x306A;&#x7D50;&#x679C;&#x306B;&#x306A;&#x3089;&#x306A;&#x3044;&#x5834;&#x5408;&#x3082;&#x3042;&#x308A;&#x307E;&#x3059;&#x3002;
-&#x306A;&#x305C;&#x306A;&#x3089;&#x3001;Code Point&#x306B;&#x306F;&#x5236;&#x5FA1;&#x6587;&#x5B57;&#x306A;&#x3069;&#x306E;&#x8996;&#x899A;&#x7684;&#x306B;&#x898B;&#x3048;&#x306A;&#x3044;&#x3082;&#x306E;&#x3082;&#x5B9A;&#x7FA9;&#x3055;&#x308C;&#x3066;&#x3044;&#x308B;&#x305F;&#x3081;&#x3067;&#x3059;&#x3002;
-&#x305D;&#x306E;&#x305F;&#x3081;&#x3001;&#x6587;&#x5B57;&#x3068;&#x3057;&#x3066;&#x6570;&#x3048;&#x305F;&#x304F;&#x306A;&#x3044;&#x3082;&#x306E;&#x306F;&#x7121;&#x8996;&#x3059;&#x308B;&#x306A;&#x3069;&#x3001;&#x8996;&#x899A;&#x7684;&#x306A;<strong>&#x6587;&#x5B57;&#x5217;&#x306E;&#x9577;&#x3055;</strong>&#x3092;&#x6570;&#x3048;&#x308B;&#x306B;&#x306F;&#x3055;&#x3089;&#x306A;&#x308B;&#x5DE5;&#x592B;&#x304C;&#x5FC5;&#x8981;&#x306B;&#x306A;&#x308A;&#x307E;&#x3059;&#x3002;
-&#x6B8B;&#x5FF5;&#x306A;&#x304C;&#x3089;&#x3001;&#x30D3;&#x30EB;&#x30C8;&#x30A4;&#x30F3;&#x30E1;&#x30BD;&#x30C3;&#x30C9;&#x306B;&#x306F;&#x3053;&#x308C;&#x3089;&#x3092;&#x7C21;&#x5358;&#x306B;&#x6271;&#x3046;&#x65B9;&#x6CD5;&#x306F;&#x7528;&#x610F;&#x3055;&#x308C;&#x3066;&#x3044;&#x307E;&#x305B;&#x3093;&#x3002;</p>
-<h3 id="loop-each-code-point"><a name="loop-each-code-point" class="plugin-anchor" href="#loop-each-code-point"><i class="fa fa-link" aria-hidden="true"></i></a>Code Point&#x3054;&#x3068;&#x306B;&#x53CD;&#x5FA9;&#x51E6;&#x7406;&#x3092;&#x3059;&#x308B; </h3>
-<p>&#x5148;&#x307B;&#x3069;&#x7D39;&#x4ECB;&#x3057;&#x305F;<code>Array.from</code>&#x30E1;&#x30BD;&#x30C3;&#x30C9;&#x3092;&#x4F7F;&#x3048;&#x3070;&#x3001;&#x6587;&#x5B57;&#x5217;&#x3092;Code Point&#x3067;&#x533A;&#x5207;&#x3063;&#x305F;&#x6587;&#x5B57;&#x306E;&#x914D;&#x5217;&#x3078;&#x3068;&#x5909;&#x63DB;&#x3067;&#x304D;&#x307E;&#x3059;&#x3002;
-&#x914D;&#x5217;&#x306B;&#x3059;&#x308C;&#x3070;&#x3001;&#x3042;&#x3068;&#x306F;&#x300C;<a href="../loop/">&#x30EB;&#x30FC;&#x30D7;&#x3068;&#x53CD;&#x5FA9;&#x51E6;&#x7406;</a>&#x300D;&#x306E;&#x7AE0;&#x3067;&#x5B66;&#x3093;&#x3060;&#x65B9;&#x6CD5;&#x3092;&#x4F7F;&#x3063;&#x3066;&#x3001;Code Point&#x3054;&#x3068;&#x306B;&#x53CD;&#x5FA9;&#x51E6;&#x7406;&#x304C;&#x3067;&#x304D;&#x307E;&#x3059;&#x3002;</p>
-<p>&#x6B21;&#x306E;&#x30B3;&#x30FC;&#x30C9;&#x3067;&#x306F;&#x3001;&#x6587;&#x5B57;&#x5217;&#x4E2D;&#x306B;&#x767B;&#x5834;&#x3059;&#x308B;<code>&#x1F34E;</code>&#x306E;&#x500B;&#x6570;&#x3092;&#x6570;&#x3048;&#x3066;&#x3044;&#x307E;&#x3059;&#x3002;
-<code>countOfCodePoints</code>&#x95A2;&#x6570;&#x306F;&#x3001;<code>Array.from</code>&#x3067;Code Point&#x3054;&#x3068;&#x306E;&#x914D;&#x5217;&#x306B;&#x3057;&#x3001;&#x914D;&#x5217;&#x3092;<code>codePoint</code>&#x3067;&#x30D5;&#x30A3;&#x30EB;&#x30BF;&#x30FC;&#x3057;&#x305F;&#x7D50;&#x679C;&#x3067;&#x304D;&#x305F;&#x914D;&#x5217;&#x306E;&#x8981;&#x7D20;&#x6570;&#x3092;&#x8FD4;&#x3057;&#x307E;&#x3059;&#x3002;</p>
+<p>しかし、Code Pointの数を数えた場合でも、直感的な結果にならない場合もあります。
+なぜなら、Code Pointには制御文字などの視覚的に見えないものも定義されているためです。
+そのため、文字として数えたくないものは無視するなど、視覚的な<strong>文字列の長さ</strong>を数えるにはさらなる工夫が必要になります。</p>
+<!-- TODO: Intl.Segmenter を使った方法について言及するにはIntl自体の紹介が必要 -->
+<h3 id="loop-each-code-point"><a name="loop-each-code-point" class="plugin-anchor" href="#loop-each-code-point"><i class="fa fa-link" aria-hidden="true"></i></a>Code Pointごとに反復処理をする </h3>
+<p>先ほど紹介した<code>Array.from</code>メソッドを使えば、文字列をCode Pointで区切った文字の配列へと変換できます。
+配列にすれば、あとは「<a href="../loop/">ループと反復処理</a>」の章で学んだ方法を使って、Code Pointごとに反復処理ができます。</p>
+<p>次のコードでは、文字列中に登場する<code>🍎</code>の個数を数えています。
+<code>countOfCodePoints</code>関数は、<code>Array.from</code>でCode Pointごとの配列にし、配列を<code>codePoint</code>でフィルターした結果できた配列の要素数を返します。</p>
 <p><a class="gitbook-plugin-js-console" aria-hidden="true"></a></p>
-<pre><code class="lang-js"><span class="hljs-comment">// &#x6307;&#x5B9A;&#x3057;&#x305F;`codePoint`&#x306E;&#x500B;&#x6570;&#x3092;&#x6570;&#x3048;&#x308B;</span>
-<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">countOfCodePoints</span>(<span class="hljs-params">str, codePoint</span>) </span>{
-    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Array</span>.from(str).filter(item =&gt; {
+<pre><code class="lang-js"><span class="hljs-comment">// 指定した`codePoint`の個数を数える</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">countOfCodePoints</span>(<span class="hljs-params">str, codePoint</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(str).<span class="hljs-title function_">filter</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> {
         <span class="hljs-keyword">return</span> item === codePoint;
-    }).length;
+    }).<span class="hljs-property">length</span>;
 }
-<span class="hljs-built_in">console</span>.log(countOfCodePoints(<span class="hljs-string">&quot;&#x1F34E;&#x1F347;&#x1F34E;&#x1F955;&#x1F352;&quot;</span>, <span class="hljs-string">&quot;&#x1F34E;&quot;</span>)); <span class="hljs-comment">// =&gt; 2</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title function_">countOfCodePoints</span>(<span class="hljs-string">"🍎🍇🍎🥕🍒"</span>, <span class="hljs-string">"🍎"</span>)); <span class="hljs-comment">// =&gt; 2</span>
 </code></pre>
-<p><code>for...of</code>&#x306B;&#x3088;&#x308B;&#x53CD;&#x5FA9;&#x51E6;&#x7406;&#x3082;&#x6587;&#x5B57;&#x5217;&#x3092;Code Point&#x3054;&#x3068;&#x306B;&#x6271;&#x3048;&#x307E;&#x3059;&#x3002;
-&#x3053;&#x308C;&#x306F;&#x3001;<code>for...of</code>&#x6587;&#x304C;&#x5BFE;&#x8C61;&#x3092;Iterator&#x3068;&#x3057;&#x3066;&#x5217;&#x6319;&#x3059;&#x308B;&#x305F;&#x3081;&#x3067;&#x3059;&#x3002;</p>
-<p>&#x5148;&#x307B;&#x3069;&#x306E;&#x30B3;&#x30FC;&#x30C9;&#x3068;&#x540C;&#x3058;<code>countOfCodePoints</code>&#x95A2;&#x6570;&#x3092;<code>for...of</code>&#x3092;&#x4F7F;&#x3063;&#x3066;&#x5B9F;&#x88C5;&#x3057;&#x3066;&#x307F;&#x307E;&#x3059;&#x3002;</p>
+<p><code>for...of</code>による反復処理も文字列をCode Pointごとに扱えます。
+これは、<code>for...of</code>文が対象をIteratorとして列挙するためです。</p>
+<p>先ほどのコードと同じ<code>countOfCodePoints</code>関数を<code>for...of</code>を使って実装してみます。</p>
 <p><a class="gitbook-plugin-js-console" aria-hidden="true"></a></p>
-<pre><code class="lang-js"><span class="hljs-comment">// &#x6307;&#x5B9A;&#x3057;&#x305F;`codePoint`&#x306E;&#x500B;&#x6570;&#x3092;&#x6570;&#x3048;&#x308B;</span>
-<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">countOfCodePoints</span>(<span class="hljs-params">str, codePoint</span>) </span>{
+<pre><code class="lang-js"><span class="hljs-comment">// 指定した`codePoint`の個数を数える</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">countOfCodePoints</span>(<span class="hljs-params">str, codePoint</span>) {
     <span class="hljs-keyword">let</span> count = <span class="hljs-number">0</span>;
     <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> item <span class="hljs-keyword">of</span> str) {
         <span class="hljs-keyword">if</span> (item === codePoint) {
@@ -1642,26 +1788,27 @@ iterable&#x30AA;&#x30D6;&#x30B8;&#x30A7;&#x30AF;&#x30C8;&#x3068;&#x306F;<code>Sy
     }
     <span class="hljs-keyword">return</span> count;
 }
-<span class="hljs-built_in">console</span>.log(countOfCodePoints(<span class="hljs-string">&quot;&#x1F34E;&#x1F347;&#x1F34E;&#x1F955;&#x1F352;&quot;</span>, <span class="hljs-string">&quot;&#x1F34E;&quot;</span>)); <span class="hljs-comment">// =&gt; 2</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title function_">countOfCodePoints</span>(<span class="hljs-string">"🍎🍇🍎🥕🍒"</span>, <span class="hljs-string">"🍎"</span>)); <span class="hljs-comment">// =&gt; 2</span>
 </code></pre>
-<h2 id="conclusion"><a name="conclusion" class="plugin-anchor" href="#conclusion"><i class="fa fa-link" aria-hidden="true"></i></a>&#x7D42;&#x308F;&#x308A;&#x306B; </h2>
-<p>&#x3053;&#x306E;&#x7AE0;&#x3067;&#x306F;&#x3001;&#x6587;&#x5B57;&#x5217;&#x3068;Unicode&#x306E;&#x95A2;&#x4FC2;&#x306B;&#x3064;&#x3044;&#x3066;&#x7C21;&#x6F54;&#x306B;&#x7D39;&#x4ECB;&#x3057;&#x307E;&#x3057;&#x305F;&#x3002;
-Unicode&#x306B;&#x306F;&#x3053;&#x306E;&#x7AE0;&#x3067;&#x7D39;&#x4ECB;&#x3057;&#x304D;&#x308C;&#x306A;&#x304B;&#x3063;&#x305F;&#x8868;&#x73FE;&#x3082;&#x3042;&#x308A;&#x307E;&#x3059;&#x3002;
-&#x307E;&#x305F;&#x3001;JavaScript&#x306B;&#x306F;Unicode&#x3092;&#x30AD;&#x30EC;&#x30A4;&#x306B;&#x6271;&#x3046;API&#x304C;&#x7528;&#x610F;&#x3055;&#x308C;&#x3066;&#x3044;&#x308B;&#x3068;&#x306F;&#x8A00;&#x3044;&#x5207;&#x308C;&#x306A;&#x3044;&#x90E8;&#x5206;&#x3082;&#x3042;&#x308A;&#x307E;&#x3059;&#x3002;</p>
-<p>&#x4E00;&#x65B9;&#x3067;&#x300C;<a href="../string/">&#x6587;&#x5B57;&#x5217;</a>&#x300D;&#x306E;&#x7AE0;&#x3067;&#x7D39;&#x4ECB;&#x3057;&#x305F;&#x3088;&#x3046;&#x306B;&#x3001;Code Unit&#x3084;Code Point&#x3092;&#x610F;&#x8B58;&#x3057;&#x306A;&#x304F;&#x3066;&#x3082;&#x67D4;&#x8EDF;&#x3067;&#x5F37;&#x529B;&#x306A;&#x6587;&#x5B57;&#x5217;&#x51E6;&#x7406;&#x304C;&#x3067;&#x304D;&#x307E;&#x3059;&#x3002;
-&#x3057;&#x304B;&#x3057;&#x3001;&#x8FD1;&#x5E74;&#x306F;&#x7D75;&#x6587;&#x5B57;&#x3092;&#x5229;&#x7528;&#x3059;&#x308B;&#x30B1;&#x30FC;&#x30B9;&#x304C;&#x591A;&#x304F;&#x306A;&#x3063;&#x305F;&#x305F;&#x3081;&#x3001;Code Point&#x3092;&#x610F;&#x8B58;&#x3057;&#x305F;&#x30D7;&#x30ED;&#x30B0;&#x30E9;&#x30DF;&#x30F3;&#x30B0;&#x304C;&#x5FC5;&#x8981;&#x3068;&#x306A;&#x308B;&#x30B1;&#x30FC;&#x30B9;&#x3082;&#x5897;&#x3048;&#x3066;&#x3044;&#x307E;&#x3059;&#x3002;</p>
-<p>Unicode&#x306F;ECMAScript&#x3068;&#x306F;&#x72EC;&#x7ACB;&#x3057;&#x305F;&#x4ED5;&#x69D8;&#x3067;&#x3042;&#x308B;&#x305F;&#x3081;&#x3001;&#x6587;&#x5B57;&#x5217;&#x3092;&#x6271;&#x3046;&#x60A9;&#x307F;&#x306F;&#x30D7;&#x30ED;&#x30B0;&#x30E9;&#x30DF;&#x30F3;&#x30B0;&#x8A00;&#x8A9E;&#x3092;&#x554F;&#x308F;&#x305A;&#x306B;&#x51FA;&#x3066;&#x304F;&#x308B;&#x5171;&#x901A;&#x306E;&#x8AB2;&#x984C;&#x3067;&#x3059;&#x3002;
-&#x7279;&#x306B;Java&#x306F;JavaScript&#x3068;&#x540C;&#x3058;&#x304F;UTF-16&#x3092;&#x30A8;&#x30F3;&#x30B3;&#x30FC;&#x30C9;&#x65B9;&#x5F0F;&#x3068;&#x3057;&#x3066;&#x63A1;&#x7528;&#x3057;&#x3066;&#x3044;&#x308B;&#x305F;&#x3081;&#x3001;&#x985E;&#x4F3C;&#x3059;&#x308B;&#x554F;&#x984C;&#x304C;&#x898B;&#x3089;&#x308C;&#x307E;&#x3059;&#x3002;
-&#x305D;&#x306E;&#x305F;&#x3081;&#x3001;JavaScript&#x3067;&#x6587;&#x5B57;&#x5217;&#x51E6;&#x7406;&#x306E;&#x554F;&#x984C;&#x306B;&#x3076;&#x3064;&#x304B;&#x3063;&#x305F;&#x969B;&#x306B;&#x306F;&#x3001;&#x4ED6;&#x306E;&#x8A00;&#x8A9E;&#x3067;&#x306F;&#x3069;&#x3046;&#x3057;&#x3066;&#x3044;&#x308B;&#x304B;&#x3092;&#x8ABF;&#x3079;&#x308B;&#x3053;&#x3068;&#x3082;&#x91CD;&#x8981;&#x3067;&#x3059;&#x3002;</p>
-
+<h2 id="conclusion"><a name="conclusion" class="plugin-anchor" href="#conclusion"><i class="fa fa-link" aria-hidden="true"></i></a>終わりに </h2>
+<p>この章では、文字列とUnicodeの関係について簡潔に紹介しました。
+Unicodeにはこの章で紹介しきれなかった表現もあります。
+また、JavaScriptにはUnicodeをキレイに扱うAPIが用意されているとは言い切れない部分もあります。</p>
+<p>一方で「<a href="../string/">文字列</a>」の章で紹介したように、Code UnitやCode Pointを意識しなくても柔軟で強力な文字列処理ができます。
+しかし、近年は絵文字を利用するケースが多くなったため、Code Pointを意識したプログラミングが必要となるケースも増えています。</p>
+<p>UnicodeはECMAScriptとは独立した仕様であるため、文字列を扱う悩みはプログラミング言語を問わずに出てくる共通の課題です。
+特にJavaはJavaScriptと同じくUTF-16をエンコード方式として採用しているため、類似する問題が見られます。
+そのため、JavaScriptで文字列処理の問題にぶつかった際には、他の言語ではどうしているかを調べることも重要です。</p>
+</body></html>
                                 
+
                                 </section>
                             
                         </div>
                     </div>
                 
 <footer class="book_footer">
-    <p>Copyright (c) 2016-present <a href="https://github.com/asciidwango/js-primer">jsprimer project</a></p>
+    <p>Copyright (c) 2016-present <a href="https://github.com/asciidwango/js-primer" target="_blank">jsprimer project</a></p>
 </footer>
 
             </div>
@@ -1684,21 +1831,61 @@ Unicode&#x306B;&#x306F;&#x3053;&#x306E;&#x7AE0;&#x3067;&#x7D39;&#x4ECB;&#x3057;&
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"author":"azu","description":"JavaScriptが採用している文字コードであるUnicodeと関連するStringのメソッドについて紹介します。Stringのメソッドや文字列を扱う上で、UTF-16でエンコードされていることを意識する場面について紹介します。","title":"文字列とUnicode","level":"1.3.16","depth":2,"next":{"title":"ラッパーオブジェクト","level":"1.3.17","depth":2,"path":"basic/wrapper-object/README.md","ref":"./basic/wrapper-object/README.md","articles":[]},"previous":{"title":"文字列","level":"1.3.15","depth":2,"path":"basic/string/README.md","ref":"./basic/string/README.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-search","-lunr","page-toc-button","include-codeblock","anchors","canonical-link","ga","js-console","github-issue-feedback"],"root":"./source/","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"docSearch":{"apiKey":"fd28ebaba94be0c39fb9fa1b2fed4f23","index":"asciidwango"},"github-issue-feedback":{"repo":"asciidwango/js-primer"},"fontsettings":{"theme":"white","family":"sans","size":2},"js-console":{},"canonical-link":{"baseURL":"https://jsprimer.net"},"highlight":{},"page-toc-button":{"maxTocDepth":2,"minTocSize":2},"ga":{"configuration":"auto","token":"UA-2184335-18"},"include-codeblock":{"check":false,"edit":false,"lang":"","fixlang":false,"template":"./resources/gitbook-plugin-include-codeblock.hbs","theme":"chrome","unindent":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"edit-link":{"base":"https://github.com/asciidwango/js-primer/edit/master/source/","label":"Edit"},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"IPAexMincho","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"index.md","glossary":"GLOSSARY.md","summary":"README.md"},"variables":{"esversion":"2019","nodeversion":"12.13.0","npmversion":"6.12.0","triplebackticks":"```","console":"<a class=\"gitbook-plugin-js-console\" aria-hidden=\"true\"></a>"},"title":"JavaScript Primer #jsprimer","gitbook":">=3.0.0","description":"JavaScriptの基本的な書き方からアプリケーションの作成などのユースケースを学ぶための入門書です"},"file":{"path":"basic/string-unicode/README.md","mtime":"2020-05-06T04:40:52.903Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-05-06T04:42:25.071Z"},"basePath":"../..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"author":"azu","description":"JavaScriptが採用している文字コードであるUnicodeと関連するStringのメソッドについて紹介します。Stringのメソッドや文字列を扱う上で、UTF-16でエンコードされていることを意識する場面について紹介します。","sponsors":[],"title":"文字列とUnicode","level":"1.3.16","depth":2,"next":{"title":"ラッパーオブジェクト","level":"1.3.17","depth":2,"path":"basic/wrapper-object/README.md","ref":"./basic/wrapper-object/README.md","articles":[]},"previous":{"title":"文字列","level":"1.3.15","depth":2,"path":"basic/string/README.md","ref":"./basic/string/README.md","articles":[]},"dir":"ltr"},"config":{"plugins":["-search","-lunr","page-toc-button","include-codeblock","anchors","canonical-link","js-console","github-issue-feedback","sandpack"],"root":"./source/","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"docSearch":{"index":"83I8JIFICQ","apiKey":"9169ce4cd84fcf2376f29d9585c89254"},"github-issue-feedback":{"repo":"asciidwango/js-primer","label":"問題を報告する"},"fontsettings":{"theme":"white","family":"sans","size":2},"js-console":{},"canonical-link":{"baseURL":"https://jsprimer.net"},"highlight":{},"page-toc-button":{"maxTocDepth":2,"minTocSize":2},"include-codeblock":{"check":false,"edit":false,"lang":"","fixlang":false,"template":"./resources/gitbook-plugin-include-codeblock.hbs","theme":"chrome","unindent":false},"sandpack":{},"edit-link":{"base":"https://github.com/asciidwango/js-primer/edit/master/source/","label":"Edit"},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchors":{}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"IPAexMincho","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"structure":{"langs":"LANGS.md","readme":"index.md","glossary":"GLOSSARY.md","summary":"README.md"},"variables":{"esversion":"2024","nodeversion":"22.7.0","npmversion":"10.8.2","triplebackticks":"```","console":"<a class=\"gitbook-plugin-js-console\" aria-hidden=\"true\"></a>"},"title":"JavaScript Primer #jsprimer","gitbook":">=3.0.0","description":"JavaScriptの基本的な書き方からアプリケーションの作成などのユースケースを学ぶための入門書です"},"file":{"path":"basic/string-unicode/README.md","mtime":"2024-12-23T08:29:41.254Z","type":"markdown"},"gitbook":{"version":"6.0.2","time":"2024-12-23T08:30:00.722Z"},"basePath":"../..","book":{"language":""}});
         });
     </script>
 </div>
 
         
+    <noscript>
+        <style>
+            .honkit-cloak {
+                display: block !important;
+            }
+        </style>
+    </noscript>
+    <script>
+        // Restore sidebar state as critical path for prevent layout shift
+        function __init__getSidebarState(defaultValue){
+            var baseKey = "";
+            var key = baseKey + ":sidebar";
+            try {
+                var value = localStorage[key];
+                if (value === undefined) {
+                    return defaultValue;
+                }
+                var parsed = JSON.parse(value);
+                return parsed == null ? defaultValue : parsed;
+            } catch (e) {
+                return defaultValue;
+            }
+        }
+        function __init__restoreLastSidebarState() {
+            var isMobile = window.matchMedia("(max-width: 600px)").matches;
+            if (isMobile) {
+                // Init last state if not mobile
+                return;
+            }
+            var sidebarState = __init__getSidebarState(true);
+            var book = document.querySelector(".book");
+            // Show sidebar if it enabled
+            if (sidebarState && book) {
+                book.classList.add("without-animation", "with-summary");
+            }
+        }
+
+        try {
+            __init__restoreLastSidebarState();
+        } finally {
+            var book = document.querySelector(".book");
+            book.classList.remove("honkit-cloak");
+        }
+    </script>
     <script src="../../gitbook/gitbook.js"></script>
     <script src="../../gitbook/theme.js"></script>
     
         
         <script src="../../gitbook/gitbook-plugin-page-toc-button/plugin.js"></script>
-        
-    
-        
-        <script src="../../gitbook/gitbook-plugin-ga/plugin.js"></script>
         
     
         
@@ -1710,11 +1897,11 @@ Unicode&#x306B;&#x306F;&#x3053;&#x306E;&#x7AE0;&#x3067;&#x7D39;&#x4ECB;&#x3057;&
         
     
         
-        <script src="../../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        <script src="../../gitbook/honkit-plugin-sandpack/honkit-plugin-sandpack.js"></script>
         
     
         
-        <script src="../../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        <script src="../../gitbook/@honkit/honkit-plugin-fontsettings/fontsettings.js"></script>
         
     
 

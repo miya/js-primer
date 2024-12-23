@@ -1,27 +1,27 @@
-const program = require("commander");
-const fs = require("fs");
-const marked = require("marked");
+import * as util from "node:util";
+import * as fs from "node:fs/promises";
+import { marked } from "marked";
 
-// gfmオプションを定義する
-program.option("--gfm", "GFMを有効にする");
-program.parse(process.argv);
-const filePath = program.args[0];
-
-// コマンドライン引数のオプションを取得し、デフォルトのオプションを上書きする
-const cliOptions = {
-    gfm: false,
-    ...program.opts(),
-};
-
-fs.readFile(filePath, { encoding: "utf8" }, (err, file) => {
-    if (err) {
-        console.error(err.message);
-        process.exit(1);
-        return;
+const {
+    values,
+    positionals
+} = util.parseArgs({
+    allowPositionals: true,
+    options: {
+        gfm: {
+            type: "boolean",
+            default: false,
+        }
     }
-    const html = marked(file, {
-        // オプションの値を使用する
-        gfm: cliOptions.gfm,
+});
+const filePath = positionals[0];
+fs.readFile(filePath, { encoding: "utf8" }).then(file => {
+    const html = marked.parse(file, {
+        // gfmフラグのパース結果をオプションとして渡す
+        gfm: values.gfm
     });
     console.log(html);
+}).catch(err => {
+    console.error(err.message);
+    process.exit(1);
 });
